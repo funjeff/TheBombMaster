@@ -104,9 +104,14 @@ public class BombMaster extends GameObject {
 			
 			if (this.getSprite().equals(BACK)) {
 				
-				if (this.getAnimationHandler().getFrame() == 4 && beingThrown == null) {
+				if (this.getAnimationHandler().getFrame() >= 4 && this.getAnimationHandler().getFrame() < 6 && beingThrown == null) {
 					beingThrown = new Bomb ();
-					beingThrown.declare(this.getX(),this.getY() + 10);
+					beingThrown.declare(this.getX(),this.getY());
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 4) {
+					beingThrown.setX(this.getX());
+					beingThrown.setY(this.getY() + 10);
 				}
 				
 				if (this.getAnimationHandler().getFrame() == 5) {
@@ -126,9 +131,15 @@ public class BombMaster extends GameObject {
 			
 			if (this.getSprite().equals(FORWARD)) {
 				
-				if (this.getAnimationHandler().getFrame() == 5 && beingThrown == null) {
-					beingThrown = new Bomb();
-					beingThrown.declare(this.getX() -11,this.getY() + 1);
+				if (this.getAnimationHandler().getFrame() >= 5 && this.getAnimationHandler().getFrame() < 8 && beingThrown == null) {
+					beingThrown = new Bomb ();
+					beingThrown.declare(this.getX(),this.getY());
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 5) {
+					beingThrown.setX(this.getX() -11);
+					beingThrown.setY(this.getY() + 1);
+				
 				}
 				
 				if (this.getAnimationHandler().getFrame() == 6) {
@@ -154,9 +165,14 @@ public class BombMaster extends GameObject {
 			
 			if (this.getSprite().equals(SIDE) && !this.getAnimationHandler().flipHorizontal()) {
 				
-				if (this.getAnimationHandler().getFrame() == 5 && beingThrown == null) {
-					beingThrown = new Bomb();
-					beingThrown.declare(this.getX() -1,this.getY() + 9);
+				if (this.getAnimationHandler().getFrame() >= 5 && this.getAnimationHandler().getFrame() < 7 && beingThrown == null) {
+					beingThrown = new Bomb ();
+					beingThrown.declare(this.getX(),this.getY());
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 5) {
+					beingThrown.setX(this.getX() -1);
+					beingThrown.setY(this.getY() + 9);
 				}
 				
 				if (this.getAnimationHandler().getFrame() == 6) {
@@ -176,9 +192,14 @@ public class BombMaster extends GameObject {
 			
 			if (this.getSprite().equals(SIDE) && this.getAnimationHandler().flipHorizontal()) {
 				
-				if (this.getAnimationHandler().getFrame() == 5 && beingThrown == null) {
-					beingThrown = new Bomb();
-					beingThrown.declare(this.getX() + 9,this.getY() + 9);
+				if (this.getAnimationHandler().getFrame() >= 5 && this.getAnimationHandler().getFrame() < 7 && beingThrown == null) {
+					beingThrown = new Bomb ();
+					beingThrown.declare(this.getX(),this.getY());
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 5) {
+					beingThrown.setX(this.getX() + 9);
+					beingThrown.setY(this.getY() + 9);
 				}
 				
 				if (this.getAnimationHandler().getFrame() == 6) {
@@ -198,9 +219,14 @@ public class BombMaster extends GameObject {
 			
 			if (this.getSprite().equals(DIAGONAL_FORWARD) && !this.getAnimationHandler().flipHorizontal()) {
 				
-				if (this.getAnimationHandler().getFrame() == 4 && beingThrown == null) {
-					beingThrown = new Bomb();
-					beingThrown.declare(this.getX() - 5,this.getY() - 2);
+				if (this.getAnimationHandler().getFrame() >= 4 && this.getAnimationHandler().getFrame() < 6 && beingThrown == null) {
+					beingThrown = new Bomb ();
+					beingThrown.declare(this.getX(),this.getY());
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 4) {
+					beingThrown.setX(this.getX() - 5);
+					beingThrown.setY(this.getY() - 2);
 				}
 				
 				if (this.getAnimationHandler().getFrame() == 5) {
@@ -219,9 +245,14 @@ public class BombMaster extends GameObject {
 			
 			if (this.getSprite().equals(DIAGONAL_FORWARD) && this.getAnimationHandler().flipHorizontal()) {
 				
-				if (this.getAnimationHandler().getFrame() == 4 && beingThrown == null) {
-					beingThrown = new Bomb();
-					beingThrown.declare(this.getX() + 20,this.getY() - 2);
+				if (this.getAnimationHandler().getFrame() >= 4 && this.getAnimationHandler().getFrame() < 6 && beingThrown == null) {
+					beingThrown = new Bomb ();
+					beingThrown.declare(this.getX(),this.getY());
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 4) {
+					beingThrown.setX(this.getX() + 20);
+					beingThrown.setY(this.getY() - 2);
 				}
 				
 				if (this.getAnimationHandler().getFrame() == 5) {
@@ -240,9 +271,14 @@ public class BombMaster extends GameObject {
 			
 			if (this.getSprite().equals(DIAGONAL_BACK) && !this.getAnimationHandler().flipHorizontal()) {
 				
-				if (this.getAnimationHandler().getFrame() == 5 && beingThrown == null) {
-					beingThrown = new Bomb();
-					beingThrown.declare(this.getX() + 6,this.getY() + 12);
+				if (this.getAnimationHandler().getFrame() >= 5 && this.getAnimationHandler().getFrame() < 8 && beingThrown == null) {
+					beingThrown = new Bomb ();
+					beingThrown.declare(this.getX(),this.getY());
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 5) {
+					beingThrown.setX(this.getX() + 6);
+					beingThrown.setY(this.getY() + 12);
 				}
 				
 				if (this.getAnimationHandler().getFrame() == 6) {
@@ -250,7 +286,7 @@ public class BombMaster extends GameObject {
 					beingThrown.setY(this.getY() + 10);
 				}
 				
-				if (this.getAnimationHandler().getFrame() == 7 && beingThrown != null) {
+				if (this.getAnimationHandler().getFrame() == 7) {
 					beingThrown.setX(this.getX() +16);
 					beingThrown.setY(this.getY() + 4);
 					
@@ -266,9 +302,14 @@ public class BombMaster extends GameObject {
 			
 			if (this.getSprite().equals(DIAGONAL_BACK) && this.getAnimationHandler().flipHorizontal()) {
 				
-				if (this.getAnimationHandler().getFrame() == 5 && beingThrown == null) {
-					beingThrown = new Bomb();
-					beingThrown.declare(this.getX() + 11,this.getY() + 12);
+				if (this.getAnimationHandler().getFrame() >= 5 && this.getAnimationHandler().getFrame() < 8 && beingThrown == null) {
+					beingThrown = new Bomb ();
+					beingThrown.declare(this.getX(),this.getY());
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 5) {
+					beingThrown.setX(this.getX() + 11);
+					beingThrown.setY(this.getY() + 12);
 				}
 				
 				if (this.getAnimationHandler().getFrame() == 6) {
@@ -276,7 +317,7 @@ public class BombMaster extends GameObject {
 					beingThrown.setY(this.getY() + 10);
 				}
 				
-				if (this.getAnimationHandler().getFrame() == 7 && beingThrown != null) {
+				if (this.getAnimationHandler().getFrame() == 7) {
 					beingThrown.setX(this.getX() +5);
 					beingThrown.setY(this.getY() + 4);
 					
