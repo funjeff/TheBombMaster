@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.Random;
 import java.util.Scanner;
 
+import gameObjects.Bomb;
 import gameObjects.BombMaster;
 import map.Room;
 import map.Room2;
