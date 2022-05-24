@@ -1,0 +1,3 @@
+$src resources/sprites/player frontt.png
+
+ grid 26 41

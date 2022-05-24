@@ -1,0 +1,3 @@
+$src resources/sprites/player front legs.png
+
+ rectangle 0 0 14 8

@@ -1,0 +1,3 @@
+$src resources/sprites/player top downleft.png
+
+ grid 48 41
