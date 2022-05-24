@@ -1,0 +1,14 @@
+{ "columns":7,
+ "image":"..\/..\/git\/TheBombMaster\/resources\/tilesets\/fence_isometric.png",
+ "imageheight":16,
+ "imagewidth":112,
+ "margin":0,
+ "name":"fence_isometric",
+ "spacing":0,
+ "tilecount":7,
+ "tiledversion":"1.8.5",
+ "tileheight":16,
+ "tilewidth":16,
+ "type":"tileset",
+ "version":"1.8"
+}
