@@ -17,6 +17,7 @@ import java.util.Scanner;
 
 import gameObjects.BombMaster;
 import map.Room;
+import map.Room2;
 
 
 
@@ -42,6 +43,11 @@ public class GameCode {
 	public static void init () {
 		BombMaster mast = new BombMaster ();
 		mast.declare();
+		
+		
+		//Test
+		Room2 room2 = new Room2 ();
+		room2.loadMap ("big_test.tmj");
 	}
 		
 	
