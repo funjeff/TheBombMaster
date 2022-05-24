@@ -1,25 +1,19 @@
 package gameObjects;
 
+import javax.swing.plaf.basic.BasicComboBoxUI.KeyHandler;
+
 import engine.GameObject;
 import engine.Sprite;
 
+import java.awt.event.KeyEvent;
+
 public class BombMaster extends GameObject {
 	
-	public static final Sprite FORWARD = new Sprite ("resources/sprites/config/bombMaster/top/idle/front.txt");
-	public static final Sprite BACK = new Sprite ("resources/sprites/config/bombMaster/top/idle/back.txt");
-	public static final Sprite SIDE = new Sprite ("resources/sprites/config/bombMaster/top/idle/side.txt");
-	public static final Sprite DIAGONAL_BACK = new Sprite ("resources/sprites/config/bombMaster/top/idle/diagonalBack.txt");
-	public static final Sprite DIAGONAL_FORWARD = new Sprite ("resources/sprites/config/bombMaster/top/idle/diagonalFront.txt");
-	
-	public static final Sprite FORWARD_THROW = new Sprite ("resources/sprites/config/bombMaster/top/throw/front.txt");
-	public static final Sprite BACK_THROW = new Sprite ("resources/sprites/config/bombMaster/top/throw/back.txt");
-	public static final Sprite SIDE_THROW = new Sprite ("resources/sprites/config/bombMaster/top/throw/side.txt");
-	public static final Sprite DIAGONAL_BACK_THROW = new Sprite ("resources/sprites/config/bombMaster/top/throw/diagonalBack.txt");
-	public static final Sprite DIAGONAL_FORWARD_THROW = new Sprite ("resources/sprites/config/bombMaster/top/throw/diagonalFront.txt");
-	
-	public static final Sprite FORWARD_LEGS_IDLE = new Sprite ("resources/sprites/config/bombMaster/legs/idle/front.txt");
-	public static final Sprite SIDE_LEGS_IDLE = new Sprite ("resources/sprites/config/bombMaster/legs/idle/sides.txt");
-	public static final Sprite DIAGONAL_LEGS_IDLE = new Sprite ("resources/sprites/config/bombMaster/legs/idle/digonal.txt");
+	public static final Sprite FORWARD = new Sprite ("resources/sprites/config/bombMaster/top/throw/front.txt");
+	public static final Sprite BACK = new Sprite ("resources/sprites/config/bombMaster/top/throw/back.txt");
+	public static final Sprite SIDE = new Sprite ("resources/sprites/config/bombMaster/top/throw/side.txt");
+	public static final Sprite DIAGONAL_BACK = new Sprite ("resources/sprites/config/bombMaster/top/throw/diagonalBack.txt");
+	public static final Sprite DIAGONAL_FORWARD = new Sprite ("resources/sprites/config/bombMaster/top/throw/diagonalFront.txt");
 	
 	public static final Sprite FORWARD_LEGS_WALK = new Sprite ("resources/sprites/config/bombMaster/legs/walk/front.txt");
 	public static final Sprite SIDE_LEGS_WALK = new Sprite ("resources/sprites/config/bombMaster/legs/walk/sides.txt");
@@ -31,13 +25,15 @@ public class BombMaster extends GameObject {
 
 	Legs myLegs = new Legs();
 	
+	Bomb beingThrown = null;
+	
 	public BombMaster()
 	{
 	
 		this.setSprite(FORWARD);
 		myLegs.setSprite(FORWARD_LEGS_WALK);
 		
-		this.getAnimationHandler().setFrameTime(100);
+		this.getAnimationHandler().setFrameTime(0);
 		myLegs.getAnimationHandler().setFrameTime(100);
 	}
 	
@@ -48,47 +44,324 @@ public class BombMaster extends GameObject {
 	
 	@Override
 	public void draw() {
-		super.draw();
-		myLegs.setY(this.getY() + this.getSprite().getHeight());
-		myLegs.setX(this.getX());
+		
+		
+		if (this.getSprite().equals(SIDE) && this.getAnimationHandler().flipHorizontal()) {
+			myLegs.setY(this.getY() + this.getSprite().getHeight() - 5);
+			myLegs.setX(this.getX() + 13);
+		}
+		
+		if (this.getSprite().equals(SIDE) && !this.getAnimationHandler().flipHorizontal()) {
+			myLegs.setY(this.getY() + this.getSprite().getHeight() - 4);
+			myLegs.setX(this.getX() + 7);
+		}
+		
+		if (this.getSprite().equals(FORWARD)) {
+			myLegs.setY(this.getY() + this.getSprite().getHeight());
+			myLegs.setX(this.getX() + 7);
+		}
+		
+		if (this.getSprite().equals(BACK)) {
+			myLegs.setY(this.getY() + this.getSprite().getHeight() - 3);
+			myLegs.setX(this.getX() + 5);
+		}
+		if (this.getSprite().equals(DIAGONAL_FORWARD) && this.getAnimationHandler().flipHorizontal()) {
+			myLegs.setY(this.getY() + this.getSprite().getHeight() - 11);
+			myLegs.setX(this.getX() + 23);
+		}
+		if (this.getSprite().equals(DIAGONAL_FORWARD) && !this.getAnimationHandler().flipHorizontal()) {
+			myLegs.setY(this.getY() + this.getSprite().getHeight() - 11);
+			myLegs.setX(this.getX() -4);
+		}
+		
+		if (this.getSprite().equals(DIAGONAL_BACK) && this.getAnimationHandler().flipHorizontal()) {
+			myLegs.setY(this.getY() + this.getSprite().getHeight() - 15);
+			myLegs.setX(this.getX() + 23);
+		}
+		if (this.getSprite().equals(DIAGONAL_BACK) && !this.getAnimationHandler().flipHorizontal()) {
+			myLegs.setY(this.getY() + this.getSprite().getHeight() - 15);
+			myLegs.setX(this.getX());
+		}
+		
+		
 		myLegs.draw();
+		
+		
+		super.draw();
+		
 	}
 	
 	public void updateSprite() {
+		
+		if (!throwingBomb) {
+			if (this.getAnimationHandler().getFrameTime() != 0) {
+				this.getAnimationHandler().setFrameTime(0);
+			}
+		} else {
+			if (this.getAnimationHandler().getFrameTime() != 50) {
+				this.getAnimationHandler().setFrameTime(50);
+			}
+			
+			if (this.getSprite().equals(BACK)) {
+				
+				if (this.getAnimationHandler().getFrame() == 4 && beingThrown == null) {
+					beingThrown = new Bomb ();
+					beingThrown.declare(this.getX(),this.getY() + 10);
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 5) {
+					beingThrown.setX(this.getX() + 3);
+					beingThrown.setY(this.getY() + 9);
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 6 && beingThrown != null) {
+					beingThrown.setX(this.getX() + 6);
+					beingThrown.setY(this.getY() + 2);
+					
+					beingThrown.throwBomb(Math.PI/2,10);
+					beingThrown = null;
+				}
+				
+			}
+			
+			if (this.getSprite().equals(FORWARD)) {
+				
+				if (this.getAnimationHandler().getFrame() == 5 && beingThrown == null) {
+					beingThrown = new Bomb();
+					beingThrown.declare(this.getX() -11,this.getY() + 1);
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 6) {
+					beingThrown.setX(this.getX() -13);
+					beingThrown.setY(this.getY() + 5);
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 7) {
+					beingThrown.setX(this.getX() -16);
+					beingThrown.setY(this.getY() + 10);
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 8 && beingThrown != null) {
+					beingThrown.setX(this.getX() - 16);
+					beingThrown.setY(this.getY() + 20);
+					
+					beingThrown.throwBomb(3*Math.PI/2,10);
+					beingThrown = null;
+				}
+				
+				
+			}
+			
+			if (this.getSprite().equals(SIDE) && !this.getAnimationHandler().flipHorizontal()) {
+				
+				if (this.getAnimationHandler().getFrame() == 5 && beingThrown == null) {
+					beingThrown = new Bomb();
+					beingThrown.declare(this.getX() -1,this.getY() + 9);
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 6) {
+					beingThrown.setX(this.getX() + 9);
+					beingThrown.setY(this.getY() + 3);
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 7 && beingThrown != null) {
+					beingThrown.setX(this.getX() + 21);
+					beingThrown.setY(this.getY() + 7);
+					
+					beingThrown.throwBomb(0,10);
+					beingThrown = null;
+				}
+				
+			}
+			
+			if (this.getSprite().equals(SIDE) && this.getAnimationHandler().flipHorizontal()) {
+				
+				if (this.getAnimationHandler().getFrame() == 5 && beingThrown == null) {
+					beingThrown = new Bomb();
+					beingThrown.declare(this.getX() + 9,this.getY() + 9);
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 6) {
+					beingThrown.setX(this.getX() - 3);
+					beingThrown.setY(this.getY() + 3);
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 7 && beingThrown != null) {
+					beingThrown.setX(this.getX() -16);
+					beingThrown.setY(this.getY() + 7);
+					
+					beingThrown.throwBomb(Math.PI,10);
+					beingThrown = null;
+				}
+				
+			}
+			
+			if (this.getSprite().equals(DIAGONAL_FORWARD) && !this.getAnimationHandler().flipHorizontal()) {
+				
+				if (this.getAnimationHandler().getFrame() == 4 && beingThrown == null) {
+					beingThrown = new Bomb();
+					beingThrown.declare(this.getX() - 5,this.getY() - 2);
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 5) {
+					beingThrown.setX(this.getX() - 7);
+					beingThrown.setY(this.getY() + 4);
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 6 && beingThrown != null) {
+					beingThrown.setX(this.getX() -12);
+					beingThrown.setY(this.getY() + 18);
+					
+					beingThrown.throwBomb(5*Math.PI/4,10);
+					beingThrown = null;
+				}	
+			}
+			
+			if (this.getSprite().equals(DIAGONAL_FORWARD) && this.getAnimationHandler().flipHorizontal()) {
+				
+				if (this.getAnimationHandler().getFrame() == 4 && beingThrown == null) {
+					beingThrown = new Bomb();
+					beingThrown.declare(this.getX() + 20,this.getY() - 2);
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 5) {
+					beingThrown.setX(this.getX() + 22);
+					beingThrown.setY(this.getY() + 4);
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 6 && beingThrown != null) {
+					beingThrown.setX(this.getX() +28);
+					beingThrown.setY(this.getY() + 18);
+					
+					beingThrown.throwBomb(7*Math.PI/4,10);
+					beingThrown = null;
+				}	
+			}
+			
+			if (this.getSprite().equals(DIAGONAL_BACK) && !this.getAnimationHandler().flipHorizontal()) {
+				
+				if (this.getAnimationHandler().getFrame() == 5 && beingThrown == null) {
+					beingThrown = new Bomb();
+					beingThrown.declare(this.getX() + 6,this.getY() + 12);
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 6) {
+					beingThrown.setX(this.getX() + 11);
+					beingThrown.setY(this.getY() + 10);
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 7 && beingThrown != null) {
+					beingThrown.setX(this.getX() +16);
+					beingThrown.setY(this.getY() + 4);
+					
+				}
+				if (this.getAnimationHandler().getFrame() == 8 && beingThrown != null) {
+					beingThrown.setX(this.getX() +29);
+					beingThrown.setY(this.getY() + 6);
+					
+					beingThrown.throwBomb(Math.PI/4,10);
+					beingThrown = null;
+				}
+			}
+			
+			if (this.getSprite().equals(DIAGONAL_BACK) && this.getAnimationHandler().flipHorizontal()) {
+				
+				if (this.getAnimationHandler().getFrame() == 5 && beingThrown == null) {
+					beingThrown = new Bomb();
+					beingThrown.declare(this.getX() + 11,this.getY() + 12);
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 6) {
+					beingThrown.setX(this.getX() + 5);
+					beingThrown.setY(this.getY() + 10);
+				}
+				
+				if (this.getAnimationHandler().getFrame() == 7 && beingThrown != null) {
+					beingThrown.setX(this.getX() +5);
+					beingThrown.setY(this.getY() + 4);
+					
+				}
+				if (this.getAnimationHandler().getFrame() == 8 && beingThrown != null) {
+					beingThrown.setX(this.getX() -13);
+					beingThrown.setY(this.getY() + 6);
+					
+					beingThrown.throwBomb(3 *Math.PI/4,10);
+					beingThrown = null;
+				}
+			}
+			
+			
+			
+			if (this.getAnimationHandler().getFrame() == this.getSprite().getFrameCount() - 1) {
+				throwingBomb = false;
+			}
+			
+			
+			
+		}
+		
+		
+		if (keyDown(KeyEvent.VK_ENTER)) {
+			throwingBomb = true;
+		}
+		
+		
+		
 		if (!keyDown('A') && !keyDown('D') && !keyDown('W') && !keyDown('S')) {
-			setIdleLegs();
+			
+			if (myLegs.getAnimationHandler().getFrameTime() != 0) {
+				int curFrame = myLegs.getAnimationHandler().getFrame();
+				myLegs.getAnimationHandler().setFrameTime(0);
+				myLegs.getAnimationHandler().setAnimationFrame(curFrame);
+			}
 			return;
 		}
 		
+		
 		//handles walking right
 		if (keyDown('D') && !keyDown('W') && !keyDown('S')) {
-			this.setSprite(SIDE);
-			myLegs.setSprite(SIDE_LEGS_WALK);
 			
-			this.getAnimationHandler().setFlipHorizontal(false);
-			myLegs.getAnimationHandler().setFlipHorizontal(false);
+			if (!throwingBomb) {
+				this.setSprite(SIDE);
+				myLegs.setSprite(SIDE_LEGS_WALK);
+			
+				this.getAnimationHandler().setFlipHorizontal(false);
+				myLegs.getAnimationHandler().setFlipHorizontal(false);
+			
+				myLegs.getAnimationHandler().setFrameTime(100);
+			}
 			
 			this.setX(this.getX() + 4);
 		}
 		
 		//handles walking left
 		if (keyDown('A') && !keyDown('W') && !keyDown('S')) {
-			this.setSprite(SIDE);
-			myLegs.setSprite(SIDE_LEGS_WALK);
 			
-			this.getAnimationHandler().setFlipHorizontal(true);
-			myLegs.getAnimationHandler().setFlipHorizontal(true);
+			if (!throwingBomb) {
+				this.setSprite(SIDE);
+				myLegs.setSprite(SIDE_LEGS_WALK);
+			
+				this.getAnimationHandler().setFlipHorizontal(true);
+				myLegs.getAnimationHandler().setFlipHorizontal(true);
+			
+				myLegs.getAnimationHandler().setFrameTime(100);
+			}
 			
 			this.setX(this.getX() - 4);
 		}
 		
 		//handles walking up
 		if (keyDown('W') && !keyDown('A') && !keyDown('D')) {
-			this.setSprite(BACK);
-			myLegs.setSprite(FORWARD_LEGS_WALK);
 			
-			this.getAnimationHandler().setFlipHorizontal(false);
-			myLegs.getAnimationHandler().setFlipHorizontal(false);
+			if (!throwingBomb) {
+				this.setSprite(BACK);
+				myLegs.setSprite(FORWARD_LEGS_WALK);
+			
+				this.getAnimationHandler().setFlipHorizontal(false);
+				myLegs.getAnimationHandler().setFlipHorizontal(false);
+			
+				myLegs.getAnimationHandler().setFrameTime(50);
+			}
 			
 			this.setY(this.getY() - 4);
 		}
@@ -96,78 +369,105 @@ public class BombMaster extends GameObject {
 		
 		//handles walking down
 		if (keyDown('S') && !keyDown('A') && !keyDown('D')) {
-			this.setSprite(FORWARD);
-			myLegs.setSprite(FORWARD_LEGS_WALK);
+			if (!throwingBomb) {
+				this.setSprite(FORWARD);
+				myLegs.setSprite(FORWARD_LEGS_WALK);
 			
-			this.getAnimationHandler().setFlipHorizontal(false);
-			myLegs.getAnimationHandler().setFlipHorizontal(false);
+				this.getAnimationHandler().setFlipHorizontal(false);
+				myLegs.getAnimationHandler().setFlipHorizontal(false);
+			
+				myLegs.getAnimationHandler().setFrameTime(50);
+			}
 			
 			this.setY(this.getY() + 4);
 		}
 		
 		//handles walking downleft
 		if (keyDown('S') && keyDown('A')) {
-			this.setSprite(DIAGONAL_FORWARD);
-			myLegs.setSprite(DIAGONAL_LEGS_WALK);
 			
-			this.getAnimationHandler().setFlipHorizontal(false);
-			myLegs.getAnimationHandler().setFlipHorizontal(false);
+			if (!throwingBomb) {
+				this.setSprite(DIAGONAL_FORWARD);
+				myLegs.setSprite(DIAGONAL_LEGS_WALK);
+			
+				this.getAnimationHandler().setFlipHorizontal(false);
+				myLegs.getAnimationHandler().setFlipHorizontal(false);
+			
+				myLegs.getAnimationHandler().setFrameTime(100);
+			
+			}
 			
 			this.setX(this.getX() - 4);
 			this.setY(this.getY() + 4);	
 		}
 		
 		//handles walking downright
-		if (keyDown('S') && keyDown('D')) {
-			this.setSprite(DIAGONAL_FORWARD);
-			myLegs.setSprite(DIAGONAL_LEGS_WALK);
-					
-			this.getAnimationHandler().setFlipHorizontal(true);
-			myLegs.getAnimationHandler().setFlipHorizontal(true);
-					
+		if (keyDown('S') && keyDown('D') && !keyDown('A')) {
+			
+			if (!throwingBomb) {
+				this.setSprite(DIAGONAL_FORWARD);
+				myLegs.setSprite(DIAGONAL_LEGS_WALK);
+						
+				this.getAnimationHandler().setFlipHorizontal(true);
+				myLegs.getAnimationHandler().setFlipHorizontal(true);
+				
+				myLegs.getAnimationHandler().setFrameTime(100);
+			}
+			
 			this.setX(this.getX() + 4);
 			this.setY(this.getY() + 4);	
 		}
 		
 		//handles walking upright
-			if (keyDown('W') && keyDown('D')) {
-				this.setSprite(DIAGONAL_BACK);
-				myLegs.setSprite(DIAGONAL_LEGS_WALK);
-						
-				this.getAnimationHandler().setFlipHorizontal(false);
-				myLegs.getAnimationHandler().setFlipHorizontal(false);
-						
+			if (keyDown('W') && keyDown('D') && !keyDown('A')) {
+				if (!throwingBomb) {
+					this.setSprite(DIAGONAL_BACK);
+					myLegs.setSprite(DIAGONAL_LEGS_WALK);
+							
+					this.getAnimationHandler().setFlipHorizontal(false);
+					myLegs.getAnimationHandler().setFlipHorizontal(false);
+					
+					myLegs.getAnimationHandler().setFrameTime(100);
+				}
+				
 				this.setX(this.getX() + 4);
 				this.setY(this.getY() - 4);	
 			}
 			
 			//handles walking upleft
 			if (keyDown('W') && keyDown('A')) {
-				this.setSprite(DIAGONAL_BACK);
-				myLegs.setSprite(DIAGONAL_LEGS_WALK);
+				
+				if (!throwingBomb) {
+					this.setSprite(DIAGONAL_BACK);
+					myLegs.setSprite(DIAGONAL_LEGS_WALK);
 						
-				this.getAnimationHandler().setFlipHorizontal(true);
-				myLegs.getAnimationHandler().setFlipHorizontal(true);
-						
+					this.getAnimationHandler().setFlipHorizontal(true);
+					myLegs.getAnimationHandler().setFlipHorizontal(true);
+				
+					myLegs.getAnimationHandler().setFrameTime(100);
+				}
+				
 				this.setX(this.getX() - 4);
 				this.setY(this.getY() - 4);	
 			}
 			
+			
+			
+			
 		
 	}
 	
-	public void setIdleLegs() {
-		if (myLegs.getSprite().equals(DIAGONAL_LEGS_WALK)) {
-			myLegs.setSprite(DIAGONAL_LEGS_IDLE);
-		}
-		if (myLegs.getSprite().equals(SIDE_LEGS_WALK)) {
-			myLegs.setSprite(SIDE_LEGS_IDLE);
-		}
-		if (myLegs.getSprite().equals(FORWARD_LEGS_WALK)) {
-			myLegs.setSprite(FORWARD_LEGS_IDLE);
-		}
-		
-	}
+//	public void setIdleLegs() {
+//		if (myLegs.getSprite().equals(DIAGONAL_LEGS_WALK)) {
+//			myLegs.setSprite(DIAGONAL_LEGS_IDLE);
+//		}
+//		if (myLegs.getSprite().equals(SIDE_LEGS_WALK)) {
+//			myLegs.setSprite(SIDE_LEGS_IDLE);
+//		}
+//		if (myLegs.getSprite().equals(FORWARD_LEGS_WALK)) {
+//			myLegs.setSprite(FORWARD_LEGS_IDLE);
+//		}
+//		
+//	}
 	
 	
 
