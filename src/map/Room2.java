@@ -13,11 +13,14 @@ import json.JSONException;
 import json.JSONObject;
 import json.JSONUtil;
 import engine.GameObject;
+import engine.ObjectHandler;
 import engine.RenderLoop;
 import engine.Sprite;
 
 public class Room2 extends GameObject {
 
+	public static boolean RENDER_ALL_MAP_OBJS = false;
+	
 	private int mapWidth;
 	private int mapHeight;
 	
@@ -28,21 +31,13 @@ public class Room2 extends GameObject {
 	
 	private ArrayList<MapLayer> layers;
 	
-	private ArrayList<MapObject> mapObjects;
+	private ArrayList<MapObject> allMapObjs;
 	private HashMap<String, MapObject> mapObjNameMap;
 	
 	@Override
 	public void draw () {
 		for (int i = 0; i < layers.size (); i++) {
-			MapLayer working = layers.get (i);
-			for (int wy = 0; wy < mapHeight; wy++) {
-				for (int wx = 0; wx < mapWidth; wx++) {
-					int tid = working.tileData[wy][wx];
-					if (tid != 0) {
-						tiles.get (tid).getSprite ().draw (wx * tileWidth, wy * tileHeight);
-					}
-				}
-			}
+			layers.get (i).draw ();
 		}
 	}
 	
@@ -98,7 +93,7 @@ public class Room2 extends GameObject {
 	public void loadMapLayers (JSONObject mapData) {
 		JSONArray mapLayers = mapData.getJSONArray ("layers");
 		for (int i = 0; i < mapLayers.getContents ().size (); i++) {
-			MapLayer working = new MapLayer ((JSONObject)mapLayers.get (i));
+			MapLayer working = new MapLayerFactory ((JSONObject)mapLayers.get (i)).newMapLayer ();
 			loadLayer (working);
 		}
 	}
@@ -131,12 +126,12 @@ public class Room2 extends GameObject {
 	public ArrayList<MapObject> getMapObjectsList () {
 		
 		//Create the map objects list if it doesn't exist
-		if (mapObjects == null) {
-			mapObjects = new ArrayList<MapObject> ();
+		if (allMapObjs == null) {
+			allMapObjs = new ArrayList<MapObject> ();
 		}
 		
 		//Return the object list
-		return mapObjects;
+		return allMapObjs;
 		
 	}
 	
@@ -171,10 +166,8 @@ public class Room2 extends GameObject {
 			if (curr.getType ().equals ("tile")) {
 				LoadedTile tileType = curr.getTile ();
 				String objTypename = tileType.getFromSet ().getName ();
-				String objType = "gameObjects." + objTypename; //TODO do this dynamically (or support multiple packages statically)
-				try {
-					Class<?> objClass = Class.forName (objType);
-					GameObject newObj = (GameObject)objClass.getConstructor ().newInstance ();
+				GameObject newObj = ObjectHandler.getInstance (objTypename);
+				if (newObj != null) {
 					newObj.declare (curr.pos.x, curr.pos.y);
 					if (curr.getRawProperties () != null) {
 						//Set all the variant attributes as needed
@@ -184,51 +177,131 @@ public class Room2 extends GameObject {
 							newObj.setVariantAttribute (working.getString ("name"), working.getString ("value")); //TODO use the type parameter? (probably not since variants are all Strings)
 						}
 					}
-				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-					System.out.println ("Error: failed to instantiate object of type " + objType + " for MapObject " + curr.getId ());
+				} else {
+					System.out.println ("Error: failed to instantiate object of type " + objTypename + " for MapObject " + curr.getId ());
 				}
 			}
 		}
 		
 	}
 	
-	private class MapLayer {
+	public class MapLayerFactory extends MapLayer {
+
+		private JSONObject layer;
+		
+		public MapLayerFactory (JSONObject layer) {
+			super ();
+			this.layer = layer;
+		}
+		
+		public MapLayer newMapLayer () {
+			
+			String layerType = layer.getString ("type");
+			System.out.println (layerType);
+			
+			switch (layerType) {
+				case "tilelayer":
+					return new TileLayer (layer);
+				case "objectgroup":
+					return new ObjectLayer (layer);
+				case "imagelayer":
+					return new ImageLayer (layer);
+				default:
+					System.out.println ("ERR: layer type not supported");
+					return null;
+			}
+			
+		}
+
+		@Override
+		public String getTypeId () {
+			return null;
+		}
+		
+	}
+	
+	public class TileLayer extends MapLayer {
 		
 		private String layerType;
 		
 		private int[][] tileData;
 		
-		public MapLayer (JSONObject layer) {
+		public TileLayer (JSONObject layer) {
 			
-			//Read in the layer type
-			layerType = layer.getString ("type");
-			
-			//TODO read misc. layer properties
+			super (layer);
 			
 			//Processing for tile layer
 			tileData = new int[mapHeight][mapWidth];
-			if (layerType.equals ("tilelayer")) {
-				JSONArray layerData = layer.getJSONArray ("data");
-				for (int wy = 0; wy < mapHeight; wy++) {
-					for (int wx = 0; wx < mapWidth; wx++) {
-						tileData[wy][wx] = (int)layerData.get (wy * mapWidth + wx);
-					}
+			JSONArray layerData = layer.getJSONArray ("data");
+			for (int wy = 0; wy < mapHeight; wy++) {
+				for (int wx = 0; wx < mapWidth; wx++) {
+					tileData[wy][wx] = (int)layerData.get (wy * mapWidth + wx);
 				}
 			}
 			
-			//Processing for object layer
-			if (layerType.equals ("objectgroup")) {
-				JSONArray objs = layer.getJSONArray ("objects");
-				for (int i = 0; i < objs.getContents ().size (); i++) {
-					JSONObject curr = (JSONObject)objs.get (i);
-					MapObject newObj = new MapObject (curr);
-					getMapObjectsList ().add (newObj);
-					if (!newObj.getName ().equals ("")) {
-						getMapObjectsMap ().put (newObj.getName (), newObj);
+		}
+
+		@Override
+		public void draw () {
+			for (int wy = 0; wy < mapHeight; wy++) {
+				for (int wx = 0; wx < mapWidth; wx++) {
+					int tid = tileData[wy][wx];
+					if (tid != 0) {
+						tiles.get (tid).getSprite ().draw (wx * tileWidth, wy * tileHeight);
 					}
 				}
 			}
+		}
+		
+		@Override
+		public String getTypeId () {
+			return "tilelayer";
+		}
+		
+	}
+	
+	public class ObjectLayer extends MapLayer {
+		
+		//TODO store objects in layer instead of map?
+		
+		public ObjectLayer (JSONObject layer) {
 			
+			super (layer);
+			
+			JSONArray objs = layer.getJSONArray ("objects");
+			for (int i = 0; i < objs.getContents ().size (); i++) {
+				JSONObject curr = (JSONObject)objs.get (i);
+				MapObject newObj = new MapObject (curr);
+				getMapObjectsList ().add (newObj);
+				if (!newObj.getName ().equals ("")) {
+					getMapObjectsMap ().put (newObj.getName (), newObj);
+				}
+			}
+			
+		}
+
+		@Override
+		public String getTypeId () {
+			return "objectgroup";
+		}
+		
+	}
+	
+	public class ImageLayer extends MapLayer {
+		
+		private String layerType;
+		
+		public ImageLayer (JSONObject layer) {
+			
+			super (layer);
+			
+			//TODO
+			
+		}
+		
+		@Override
+		public String getTypeId () {
+			return "imagelayer";
 		}
 		
 	}
@@ -358,8 +431,10 @@ public class Room2 extends GameObject {
 		public MapObject (JSONObject params) {
 			assignType (params);
 			loadProperties (params);
-			declare ();
-			this.setRenderPriority (69);
+			if (RENDER_ALL_MAP_OBJS) {
+				declare ();
+				this.setRenderPriority (69);
+			}
 		}
 		
 		public void assignType (JSONObject params) {

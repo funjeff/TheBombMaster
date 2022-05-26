@@ -775,7 +775,7 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 			if (!objectList [object].equals("Trigger") && !objectList [object].equals("Jeffrey")) {
 				GameObject objectToUse = ObjectHandler.getInstance(objectList[object]);
 				objectToUse.setVariantAttributes(variantInfo);
-				objectToUse.declare(x*16, y*16);
+				objectToUse.declare(x, y*16);
 			} else {
 				switch (objectList [object]) {
 				case "Trigger":
@@ -1293,4 +1293,6 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 			}
 		}	
 	}
+	
+	
 }
