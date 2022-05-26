@@ -24,7 +24,6 @@ import json.JSONArray;
 import json.JSONException;
 import json.JSONObject;
 import json.JSONUtil;
-import map.Room2.MapObject;
 import engine.ObjectHandler;
 import engine.RenderLoop;
 import engine.Sprite;

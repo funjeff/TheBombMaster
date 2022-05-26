@@ -2,7 +2,6 @@ package map;
 
 import json.JSONArray;
 import json.JSONObject;
-import map.Room2.MapObject;
 
 public abstract class MapLayer {
 	
