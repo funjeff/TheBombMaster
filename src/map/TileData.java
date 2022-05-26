@@ -15,6 +15,7 @@ import engine.GameObject;
 public class TileData {
 	//Container class for tile metadata
 	private String name;
+	private String fname;
 	private boolean isSolid;
 	private boolean isSpecial;
 	private GameObject observer = null;
@@ -29,6 +30,7 @@ public class TileData {
 	public TileData (String name) {
 		//Name is in the format [tileset name].[position in tileset]
 		this.name = name;
+		this.fname = name.split ("\\.")[0];
 		
 		this.isSolid = true;
 		//sets info for the defualt map
@@ -112,6 +114,9 @@ public class TileData {
 	}
 	public String getName () {
 		return name;
+	}
+	public String getFName () {
+		return fname;
 	}
 	public boolean isSpecial () {
 		return isSpecial;

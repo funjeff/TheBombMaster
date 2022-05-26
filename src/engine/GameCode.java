@@ -25,13 +25,13 @@ public class GameCode {
 	}
 
 	public static void init () {
+		
+		//Test
+		Room.loadRoom ("big_test.tmj");
+		
 		BombMaster mast = new BombMaster ();
 		mast.declare();
 		
-		
-		//Test
-		Room2 room2 = new Room2 ();
-		room2.loadMap ("big_test.tmj");
 	}
 		
 	
