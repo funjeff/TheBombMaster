@@ -14,8 +14,6 @@ import json.JSONException;
 import json.JSONObject;
 import json.JSONUtil;
 
-
-
 public class Background {
 	private AnimationHandler animationHandler;
 	private double scrollRateHorizontal;

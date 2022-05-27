@@ -338,7 +338,6 @@ public class ObjectHandler {
 		try {
 			return (GameObject)c.getConstructor().newInstance();
 		} catch (Exception e) {
-			e.printStackTrace();
 			return null;
 		}
 	}

@@ -1,26 +1,9 @@
 package engine;
 
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.event.KeyEvent;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Random;
-import java.util.Scanner;
-
-import gameObjects.Bomb;
 import gameObjects.BombMaster;
 import gameObjects.Hud;
 import map.Room;
 import map.Room2;
-
 
 
 public class GameCode {
@@ -43,15 +26,22 @@ public class GameCode {
 	}
 
 	public static void init () {
+		
+		//Test
+		Room.loadRoom ("big_test.tmj");
+		
 		BombMaster mast = new BombMaster ();
 		mast.declare();
 		
+<<<<<<< HEAD
 		Hud hud = new Hud();
 		hud.declare();
 		
 		//Test
 		//Room2 room2 = new Room2 ();
 		//room2.loadMap ("big_test.tmj");
+=======
+>>>>>>> 3fff26d8215b102742f4866a8f35708f0ae367cf
 	}
 		
 	

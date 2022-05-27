@@ -20,12 +20,14 @@ import java.util.Stack;
 import engine.GameAPI;
 import engine.GameObject;
 import engine.GameObject.HitboxInfo;
+import json.JSONArray;
+import json.JSONException;
+import json.JSONObject;
+import json.JSONUtil;
 import engine.ObjectHandler;
 import engine.RenderLoop;
 import engine.Sprite;
 import engine.SpriteParser;
-
-
 
 public class Room {
 	
@@ -37,7 +39,6 @@ public class Room {
 	
 	private static ArrayList<GameObject> mapObjectsUsed = new ArrayList<GameObject> ();
 	
-	private static int [][][] tileData; //all tiles listed by numeric ID
 	private static ArrayList <Background> backgrounds;// all backgrounds sorted by layers
 	
 	private static ArrayList <TileEntitiy> tileEntitiys; //objects that contain code related to certain tiles
@@ -72,10 +73,19 @@ public class Room {
 	private static int startMs;
 	private static int bgSpeed;
 	
-	public static final int TILE_WIDTH = 16;
-	public static final int TILE_HEIGHT = 16;
+	private static int tileWidth = 16;
+	private static int tileHeight = 16;
+	
 	public static final int SPECIAL_TILE_ID = -1;
 	public static final int ZREO = 0;
+	
+	public static final boolean SHOW_MAP_OBJS = false;
+	
+	//Stuff from (new) Room2
+	private static ArrayList<MapLayer> layerData;
+
+	private static ArrayList<MapObject> allMapObjs;
+	private static HashMap<String, MapObject> mapObjNameMap;
 	
 	private Room () {
 		//Non-electric boogaloo
@@ -88,22 +98,38 @@ public class Room {
 		return false;
 	}
 	
+	public static int getTile (int layer, int tileX, int tileY) {
+		MapLayer ml = getMapLayers ().get (layer);
+		if (ml instanceof TileLayer) { 
+			return ((TileLayer)ml).tileData[tileY][tileX];
+		} else {
+			return 0;
+		}
+	}
+	
+	public static void setTile (int tid, int layer, int tileX, int tileY) {
+		MapLayer ml = getMapLayers ().get (layer);
+		if (ml instanceof TileLayer) { 
+			((TileLayer)ml).tileData[tileY][tileX] = tid;
+		}
+	}
+	
 	private static boolean checkTileCollision (int tileX, int tileY, boolean flip) {
 		Graphics2D g = (Graphics2D)RenderLoop.wind.getBufferGraphics ();
 		g.setColor(new Color(0x0000FF));
 		if (flip) {
 			//g.draw3DRect(tileY*16, tileX*16, 16, 16, true);
-			return dataList.get(tileData[collisionLayer][tileX][tileY]).isSolid ();
+			return dataList.get(getTile (collisionLayer, tileY, tileX)).isSolid ();
 		} else {
 			//g.draw3DRect(tileX*16, tileY*16, 16, 16, true);
-			return dataList.get(tileData[collisionLayer][tileY][tileX]).isSolid ();
+			return dataList.get(getTile (collisionLayer, tileX, tileY)).isSolid ();
 		}
 	}
 	private static TileData checkTileData (int tileX, int tileY, boolean flip) {
 		if (flip) {
-			return dataList.get(tileData[collisionLayer][tileX][tileY]);
+			return dataList.get(getTile (collisionLayer, tileY, tileX));
 		} else {
-			return dataList.get(tileData[collisionLayer][tileY][tileX]);
+			return dataList.get(getTile (collisionLayer, tileX, tileY));
 		}
 	}
 	/**
@@ -133,10 +159,10 @@ public class Room {
 		
 		//DIVIDE
 		//TODO evaluate the usefulness of this method when TILE_WIDTH != TILE_HEIGHT
-		y1 /= TILE_WIDTH;
-		y2 /= TILE_WIDTH;
-		x1 /= TILE_WIDTH;
-		x2 /= TILE_WIDTH;
+		y1 /= tileWidth;
+		y2 /= tileWidth;
+		x1 /= tileWidth;
+		x2 /= tileWidth;
 		
 		//The coordinates of the tile that we are currently checking for collision
 		int tileX = (int) x1;
@@ -144,7 +170,7 @@ public class Room {
 		
 		//Easy peasy
 		if (checkTileCollision (tileX, tileY, false)) {
-			return new VectorCollisionInfo(checkTileData(tileX,tileY,false),x1*TILE_WIDTH,y1*TILE_HEIGHT,tileX,tileY);
+			return new VectorCollisionInfo(checkTileData(tileX,tileY,false),x1*tileWidth,y1*tileHeight,tileX,tileY);
 		}
 		
 		//Flipped mode
@@ -197,8 +223,8 @@ public class Room {
 							stepX = (stepY - b) / m;
 							if (isBetween (stepY, y1, y2) && isBetween (stepX, x1, x2)) {
 								//TODO will crash with tileEnitiys
-								double usedXCol = stepX*TILE_WIDTH;
-								double usedYCol = stepY*TILE_WIDTH;
+								double usedXCol = stepX*tileWidth;
+								double usedYCol = stepY*tileWidth;
 								int usedTileX = tileX;
 								int usedTileY = tileY;
 								if (flipped) {
@@ -222,8 +248,8 @@ public class Room {
 						}
 						stepY = m * stepX + b;
 						if (isBetween (stepY, y1, y2) && isBetween (stepX, x1, x2)) {
-							double usedXCol = stepX*TILE_WIDTH;
-							double usedYCol = stepY*TILE_WIDTH;
+							double usedXCol = stepX*tileWidth;
+							double usedYCol = stepY*tileWidth;
 							int usedTileX = tileX;
 							int usedTileY = tileY;
 							if (flipped) {
@@ -259,8 +285,8 @@ public class Room {
 							stepY = tileY + 1;
 							stepX = ((stepY) - b) / m;
 							if (isBetween (stepY, y1, y2) && isBetween (stepX, x1, x2)) {
-								double usedXCol = stepX*TILE_WIDTH;
-								double usedYCol = stepY*TILE_WIDTH;
+								double usedXCol = stepX*tileWidth;
+								double usedYCol = stepY*tileWidth;
 								int usedTileX = tileX;
 								int usedTileY = tileY;
 								if (flipped) {
@@ -284,8 +310,8 @@ public class Room {
 						}
 						stepY = m * stepX + b;
 						if (isBetween (stepY, y1, y2) && isBetween (stepX, x1, x2)) {
-							double usedXCol = stepX*TILE_WIDTH;
-							double usedYCol = stepY*TILE_WIDTH;
+							double usedXCol = stepX*tileWidth;
+							double usedYCol = stepY*tileWidth;
 							int usedTileX = tileX;
 							int usedTileY = tileY;
 							if (flipped) {
@@ -325,13 +351,13 @@ public class Room {
 		boolean foundCollision = false;
 		for (int i = 0; i < obj.hitboxes().length; i++) {
 			Rectangle hitbox = obj.hitboxes()[i];
-			int startX = Math.max(hitbox.x/TILE_WIDTH,0);
-			int startY = Math.max(hitbox.y/TILE_HEIGHT,0);
-			int endX = Math.min((hitbox.x + hitbox.width)/TILE_WIDTH,mapWidth-1);
-			int endY = Math.min((hitbox.y + hitbox.height)/TILE_HEIGHT,mapHeight-1);
+			int startX = Math.max(hitbox.x/tileWidth,0);
+			int startY = Math.max(hitbox.y/tileHeight,0);
+			int endX = Math.min((hitbox.x + hitbox.width)/tileWidth,mapWidth-1);
+			int endY = Math.min((hitbox.y + hitbox.height)/tileHeight,mapHeight-1);
 			for (int wx = startX; wx <= endX; wx++ ){
 				for (int wy = startY; wy <= endY; wy++) {
-					int index = tileData[collisionLayer][wy][wx];
+					int index = getTile (collisionLayer, wx, wy);
 					if (mapObjects.get(toPackedLong(wx,wy)) == null || index == SPECIAL_TILE_ID) {
 						if (index == SPECIAL_TILE_ID) {
 							long pos = toPackedLong (wx,wy);
@@ -370,13 +396,13 @@ public class Room {
 		boolean foundCollision = false;
 		for (int i = 0; i < obj.hitboxes().length; i++) {
 			Rectangle hitbox = obj.hitboxes()[i];
-			int startX = Math.max(hitbox.x/TILE_WIDTH,0);
-			int startY = Math.max(hitbox.y/TILE_HEIGHT,0);
-			int endX = Math.min((hitbox.x + hitbox.width)/TILE_WIDTH,mapWidth-1);
-			int endY = Math.min((hitbox.y + hitbox.height)/TILE_HEIGHT,mapHeight-1);
+			int startX = Math.max(hitbox.x/tileWidth,0);
+			int startY = Math.max(hitbox.y/tileHeight,0);
+			int endX = Math.min((hitbox.x + hitbox.width)/tileWidth,mapWidth-1);
+			int endY = Math.min((hitbox.y + hitbox.height)/tileHeight,mapHeight-1);
 			for (int wx = startX; wx <= endX; wx++ ){
 				for (int wy = startY; wy <= endY; wy++) {
-					int index = tileData[collisionLayer][wy][wx];
+					int index = getTile (collisionLayer, wx, wy);
 					if (index == SPECIAL_TILE_ID) {
 						long pos = toPackedLong (wx,wy);
 						if (positionToEntitiys.get(pos).getData().getName().equals(tileId)) {
@@ -400,21 +426,21 @@ public class Room {
 		ArrayList<MapTile> working =new ArrayList<MapTile>();
 		for (int i = 0; i < obj.hitboxes().length; i++) {
 			Rectangle hitbox = obj.hitboxes()[i];
-			int startX = Math.max(hitbox.x/TILE_WIDTH,0);
-			int startY = Math.max(hitbox.y/TILE_HEIGHT,0);
-			int endX = Math.min((hitbox.x + hitbox.width)/TILE_WIDTH,mapWidth-1);
-			int endY = Math.min((hitbox.y + hitbox.height)/TILE_HEIGHT,mapHeight-1);
+			int startX = Math.max(hitbox.x/tileWidth,0);
+			int startY = Math.max(hitbox.y/tileHeight,0);
+			int endX = Math.min((hitbox.x + hitbox.width)/tileWidth,mapWidth-1);
+			int endY = Math.min((hitbox.y + hitbox.height)/tileHeight,mapHeight-1);
 			for (int wx = startX; wx <= endX; wx++ ){
 				for (int wy = startY; wy <= endY; wy++) {
-					int index = tileData[collisionLayer][wy][wx];
+					int index = getTile (collisionLayer, wx, wy);
 					if (mapObjects.get(toPackedLong(wx,wy)) == null) {
 					if (index == SPECIAL_TILE_ID) {
 						long pos = toPackedLong (wx,wy);
 						if (positionToEntitiys.get(pos).doesColide(obj)) {
-							working.add(new MapTile (positionToEntitiys.get(pos).getData(),wx*TILE_WIDTH,wy*TILE_HEIGHT,positionToEntitiys.get(pos)));	
+							working.add(new MapTile (positionToEntitiys.get(pos).getData(),wx*tileWidth,wy*tileHeight,positionToEntitiys.get(pos)));	
 						}
 					} else if (dataList.get(index).isSolid()) {
-						working.add(new MapTile (dataList.get(index),wx*TILE_WIDTH,wy*TILE_HEIGHT));
+						working.add(new MapTile (dataList.get(index),wx*tileWidth,wy*tileHeight));
 					}
 					} else{
 						try {
@@ -434,12 +460,12 @@ public class Room {
 						}
 						if (index != SPECIAL_TILE_ID) {
 							if (dataList.get(index).isSolid()) {
-								working.add(new MapTile (dataList.get(index),wx*TILE_WIDTH,wy*TILE_HEIGHT));
+								working.add(new MapTile (dataList.get(index),wx*tileWidth,wy*tileHeight));
 							}
 						} else {
 							long pos = toPackedLong (wx,wy);
 							if (positionToEntitiys.get(pos).doesColide(obj)) {
-								working.add(new MapTile (positionToEntitiys.get(pos).getData(),wx*TILE_WIDTH,wy*TILE_HEIGHT,positionToEntitiys.get(pos)));	
+								working.add(new MapTile (positionToEntitiys.get(pos).getData(),wx*tileWidth,wy*tileHeight,positionToEntitiys.get(pos)));	
 							}
 						}
 						} catch (NullPointerException e) {
@@ -455,20 +481,20 @@ public class Room {
 		ArrayList<MapTile> working =new ArrayList<MapTile>();
 		for (int i = 0; i < obj.hitboxes().length; i++) {
 			Rectangle hitbox = obj.hitboxes()[i];
-			int startX = Math.max(hitbox.x/TILE_WIDTH,0);
-			int startY = Math.max(hitbox.y/TILE_HEIGHT,0);
-			int endX = Math.min((hitbox.x + hitbox.width)/TILE_WIDTH,mapWidth-1);
-			int endY = Math.min((hitbox.y + hitbox.height)/TILE_HEIGHT,mapHeight-1);
+			int startX = Math.max(hitbox.x/tileWidth,0);
+			int startY = Math.max(hitbox.y/tileHeight,0);
+			int endX = Math.min((hitbox.x + hitbox.width)/tileWidth,mapWidth-1);
+			int endY = Math.min((hitbox.y + hitbox.height)/tileHeight,mapHeight-1);
 			for (int wx = startX; wx <= endX; wx++ ){
 				for (int wy = startY; wy <= endY; wy++) {
-					int index = tileData[collisionLayer][wy][wx]; 			
+					int index = getTile (collisionLayer, wx, wy); 			
 					if (index == SPECIAL_TILE_ID) {
 						long pos = toPackedLong (wx,wy);
 						if (positionToEntitiys.get(pos).getData().getName().equals(tileName)) {
-							working.add(new MapTile (positionToEntitiys.get(pos).getData(),wx*TILE_WIDTH,wy*TILE_HEIGHT));	
+							working.add(new MapTile (positionToEntitiys.get(pos).getData(),wx*tileWidth,wy*tileHeight));	
 						}
 					} else if (dataList.get(index).getName().equals(tileName)) {
-						working.add(new MapTile (dataList.get(index),wx*TILE_WIDTH,wy*TILE_HEIGHT));
+						working.add(new MapTile (dataList.get(index),wx*tileWidth,wy*tileHeight));
 					}
 				}
 			}
@@ -484,18 +510,18 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 		ArrayList<MapTile> working =new ArrayList<MapTile>();
 		for (int i = 0; i < obj.hitboxes().length; i++) {
 			Rectangle hitbox = obj.hitboxes()[i];
-			int startX = Math.max(hitbox.x/TILE_WIDTH,0);
-			int startY = Math.max(hitbox.y/TILE_HEIGHT,0);
-			int endX = Math.min((hitbox.x + hitbox.width)/TILE_WIDTH,mapWidth-1);
-			int endY = Math.min((hitbox.y + hitbox.height)/TILE_HEIGHT,mapHeight-1);
+			int startX = Math.max(hitbox.x/tileWidth,0);
+			int startY = Math.max(hitbox.y/tileHeight,0);
+			int endX = Math.min((hitbox.x + hitbox.width)/tileWidth,mapWidth-1);
+			int endY = Math.min((hitbox.y + hitbox.height)/tileHeight,mapHeight-1);
 			for (int wx = startX; wx <= endX; wx++ ){
 				for (int wy = startY; wy <= endY; wy++) {
-					int index = tileData[collisionLayer][wy][wx];
+					int index = getTile (collisionLayer, wx, wy);
 					if (index == SPECIAL_TILE_ID) {
 						long pos = toPackedLong (wx,wy);
-							working.add(new MapTile (positionToEntitiys.get(pos).getData(),wx*TILE_WIDTH,wy*TILE_HEIGHT));	
+							working.add(new MapTile (positionToEntitiys.get(pos).getData(),wx*tileWidth,wy*tileHeight));	
 					} else {
-						working.add(new MapTile (dataList.get(index),wx*TILE_WIDTH,wy*TILE_HEIGHT));
+						working.add(new MapTile (dataList.get(index),wx*tileWidth,wy*tileHeight));
 					}
 				}
 			}
@@ -510,7 +536,7 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 	 * @return true if its solid like a rock or my mixtape
 	 */
 	public static boolean isSolid (int layer,int x, int y) {
-		return dataList.get(tileData[layer][y][x]).isSolid();
+		return dataList.get(getTile (collisionLayer, x, y)).isSolid();
 	}
 	public static ArrayList<TileEntitiy> getEntitiys(){
 		return tileEntitiys;
@@ -543,10 +569,10 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 		
 		if (updateX != -1) {
 			if (updateX > scrollX) {
-				if (updateX + RenderLoop.wind.getResolution()[0] < mapWidth * Room.TILE_WIDTH) {
+				if (updateX + RenderLoop.wind.getResolution()[0] < mapWidth * Room.tileWidth) {
 					scrollX = updateX;	
 				} else {
-					scrollX = (mapWidth * TILE_WIDTH) - RenderLoop.wind.getResolution()[0];
+					scrollX = (mapWidth * tileWidth) - RenderLoop.wind.getResolution()[0];
 					if (scrollX < 0) {
 						scrollX = 0;
 					}
@@ -562,10 +588,10 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 		}
 		if (updateY != -1) {
 			if (updateY > scrollY) {
-				if (updateY + RenderLoop.wind.getResolution()[1] < mapHeight * Room.TILE_HEIGHT) {
+				if (updateY + RenderLoop.wind.getResolution()[1] < mapHeight * Room.tileHeight) {
 					scrollY = updateY;	
 				} else {
-					scrollY = (mapHeight * TILE_HEIGHT) - RenderLoop.wind.getResolution()[1];
+					scrollY = (mapHeight * tileHeight) - RenderLoop.wind.getResolution()[1];
 					if (scrollY < 0) {
 						scrollY = 0;
 					}
@@ -591,7 +617,7 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 			for (int wx = 0; wx < mapChungi[0].length; wx++) {
 				MapChungus currentChungus = mapChungi[wy][wx];
 				
-				Rectangle chungtangle = new Rectangle (currentChungus.getX()*TILE_WIDTH,currentChungus.getY()*TILE_HEIGHT,chungusWidth*TILE_WIDTH,chungusHeight*TILE_HEIGHT);
+				Rectangle chungtangle = new Rectangle (currentChungus.getX()*tileWidth,currentChungus.getY()*tileHeight,chungusWidth*tileWidth,chungusHeight*tileHeight);
 				if (!viewport.intersects(chungtangle)) {
 					
 					if (!currentChungus.isFree()) {
@@ -633,168 +659,66 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 		backgrounds = new ArrayList<Background>();
 		tileEntitiys = new ArrayList<TileEntitiy>();
 		positionToEntitiys = new HashMap<Long,TileEntitiy>();
+		layerData = new ArrayList<MapLayer> ();
+		allMapObjs = new ArrayList<MapObject> ();
+		mapObjNameMap = new HashMap<String, MapObject> ();
+		
 		//purges the gameObjects
-			ArrayList<ArrayList<GameObject>> objList = ObjectHandler.getChildrenByName("GameObject");
-			for (int i = 0; i < objList.size (); i ++) { 
-				if (objList.get (i) != null) {
-					int listSize = objList.get (i).size ();
-					int deletThis = 0;
-					for (int j = 0; j < listSize; j ++) {
-						if (objList.get (i).get (0) != null) {
-							if (!objList.get (i).get (deletThis).isPersistent ()) {
-								objList.get (i).get (deletThis).forget ();
+		ArrayList<ArrayList<GameObject>> objList = ObjectHandler.getChildrenByName("GameObject");
+		for (int i = 0; i < objList.size (); i ++) { 
+			if (objList.get (i) != null) {
+				int listSize = objList.get (i).size ();
+				int deletThis = 0;
+				for (int j = 0; j < listSize; j ++) {
+					if (objList.get (i).get (0) != null) {
+						if (!objList.get (i).get (deletThis).isPersistent ()) {
+							objList.get (i).get (deletThis).forget ();
+						} else {
+							if (roomName.equals(path)) {
+								deletThis++;
 							} else {
-								if (roomName.equals(path)) {
-									deletThis++;
-								} else {
-									objList.get (i).get (deletThis).forget ();
-								}
+								objList.get (i).get (deletThis).forget ();
 							}
 						}
 					}
 				}
 			}
-		//Loads the RMF file at the given filepath
-		File file = null;
-		FileInputStream stream = null;
-		file = new File (path);
-		inData = new byte[(int) file.length ()];
+		}
+		
+		//Import all layers
+		JSONObject mapData;
 		try {
-			stream = new FileInputStream (file);
-		} catch (FileNotFoundException e1) {
-			return false;
-		}
-		try {
-			stream.read (inData);
-			stream.close ();
-		} catch (IOException e) {
-			return false;
-		}
-		readPos = 0;
-		char MAX_VERSION = '1';
+			mapData = JSONUtil.loadJSONFile (path);
+			loadGlobalProperties (mapData);
+			loadMapTilesets (mapData);
+			loadMapLayers (mapData);
+			spawnAllObjs ();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
 		
-		//Check header
-		String fmtString = getString (3);
-		if (!fmtString.equals ("RMF")) {
-			System.out.println("ERROR: not an RMF (raw map file)");
-			System.out.println("you most likely used the wrong map editor");
-			return false;
-		}
-		
-		String verString = getString (1);
-		if (verString.charAt (0) < '1' || verString.charAt (0) > MAX_VERSION) {
-			System.out.println("it apperas your map is an old version but if it worked anyway just ignore this message");
-			return false;
-		}
-		//Read attributes
-				int mapWidth = getInteger (4);
-				int mapHeight = getInteger (4);
-				Room.mapHeight = mapHeight;
-				Room.mapWidth = mapWidth;
-				int numLayers = getInteger (4) ;
-				Room.numLayers = numLayers;
-				int numObjects = getInteger (4);
-				tileData = new int[numLayers][mapHeight][mapWidth];
-		//Parse tile set list
-		String tilesets = getString (';');
-		String[] tilesetNameArray = tilesets.split (",");
-	
-		//Parse object list
-		String objectString = getString (';');
-		String [] objectList = objectString.split(",");
-		
-		//parse backgrounds
-		String backgroundString = getString (';');
-		String[] backgroundList = backgroundString.split (",");
-		
-		
-		//import all tilesets
-		for (int i= 0; i < tilesetNameArray.length; i++) {
-			importTileset(tilesetNameArray[i]);
-		}
-		//import all backgrounds
-	
-		for(int i = 0; i < backgroundList.length; i++) {
-			Background newBackground;
-			if (!backgroundList[i].equals("_NULL")) {
-				newBackground = new Background ("resources/backgrounds/" +backgroundList[i]);
-				i = i + 1;
-				double scrollHorizontal = Double.parseDouble(backgroundList[i]);
-				i = i + 1;
-				double scrollVertical = Double.parseDouble(backgroundList[i]);
-				newBackground.setScrollRateHorizontal(scrollHorizontal);
-				newBackground.setScrollRateVertiacal(scrollVertical);
-				backgrounds.add(newBackground);
-			} else {
-				backgrounds.add(null);
-			}
-		}
-		
-		
-		
-		//importing tiles
-		int amountOfTiles = tileIcons.size();
-		int tileByteCount = getByteCount(amountOfTiles);
+		//Create tile entities
 		for (int wl = 0; wl < numLayers; wl++) {
-			if (backgrounds.get(wl)== null) {
+			if (layerData.get (wl) instanceof TileLayer) {
 				for (int wy = 0; wy < mapHeight; wy++) {
 					for (int wx = 0; wx < mapWidth; wx++) {
-						tileData [wl][wy][wx] = getInteger(tileByteCount);
-						if (dataList.get(tileData[wl][wy][wx]).isSpecial()) {
-							TileEntitiy enity = dataList.get(tileData[wl][wy][wx]).makeEntity();
+						if (dataList.get(getTile (wl, wx, wy)).isSpecial()) {
+							TileEntitiy enity = dataList.get(getTile (wl, wx, wy)).makeEntity();
 							enity.setX(wx);
 							enity.setY(wy);
 							enity.setLayer(wl);
-							enity.setTileData(dataList.get(tileData[wl][wy][wx]));
-							enity.setTexture(tileIcons.get(tileData[wl][wy][wx]));
+							enity.setTileData(dataList.get(getTile (wl, wx, wy)));
+							enity.setTexture(tileIcons.get(getTile (wl, wx, wy)));
 							tileEntitiys.add(enity);
 							positionToEntitiys.put(toPackedLong(wx,wy),enity);
-							tileData[wl][wy][wx] = SPECIAL_TILE_ID; 
+							setTile (SPECIAL_TILE_ID, wl, wx, wy);
 						} 
 					}
 				}
 			}
 		}
-		//sets up the collsion layer right
-//		for (int i = 0; i < numLayers; i++) {
-//			if (backgrounds.get(i) == null){
-//				collisionLayer = i;
-//			}
-//		}
-		//importing objects
-		int widthByteCount = getByteCount(mapWidth);
-		int heightByteCount = getByteCount(mapHeight);
-		int objectByteCount = getByteCount(objectList.length);
-		for (int i = 0; i < numObjects; i++) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
-			int x = getInteger (widthByteCount);
-			int y = getInteger(heightByteCount);
-			int object = getInteger(objectByteCount);
-			String variantInfo = getString (';');
-			variantInfo = variantInfo.replace("#","&");
-			variantInfo = variantInfo.replace(",","&");
-			if (!objectList [object].equals("Trigger") && !objectList [object].equals("Jeffrey")) {
-				GameObject objectToUse = ObjectHandler.getInstance(objectList[object]);
-				objectToUse.setVariantAttributes(variantInfo);
-				objectToUse.declare(x*16, y*16);
-			} else {
-				switch (objectList [object]) {
-				case "Trigger":
-					GameObject objectToUse = ObjectHandler.getInstance("CollisionTrigger");
-					objectToUse.setVariantAttributes(variantInfo);
-					objectToUse.declare(x*16, y*16);
-					break;
-				case "Jeffrey":
-					GameObject obj = ObjectHandler.getInstance("Party");
-					obj.setVariantAttributes(variantInfo);
-					obj.declare(x*16, y*16);
-					break;
-				}
-				
-			}
-		}
 		
-			
-			
 		//convert the map to a big number of map chungi
 		int gridWidth = (int)Math.ceil((((double)mapWidth)/chungusWidth));
 		int gridHidth = (int)Math.ceil((((double)mapHeight)/chungusHeight)); // short for width2
@@ -807,7 +731,7 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 				for (int wwwwX = workingChungus.getX(); wwwwX <workingX; wwwwX ++) {
 					for (int wwwwY = workingChungus.getY(); wwwwY <workingY; wwwwY ++) {
 						for (int wwwwL = 0; wwwwL <numLayers; wwwwL ++) {
-							if (tileData[wwwwL][wwwwY][wwwwX] == SPECIAL_TILE_ID) {
+							if (getTile (wwwwL, wwwwX, wwwwY) == SPECIAL_TILE_ID) {
 								workingChungus.addTileEntity(positionToEntitiys.get(toPackedLong(wwwwX,wwwwY)));
 							}
 						}
@@ -819,38 +743,56 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 		isLoaded = true;
 		roomName = path;
 		return false;
+		
 	}
 	
 	/**
 	 * adds all of the tiles to the map from the given tileset
 	 * @param path the path to the tileset
 	 */
-	public static void importTileset(String path) {
-		//parses out the tiles from the tileset
-		if (!path.equals("_NULL")) {
-		ArrayList <String> working = new ArrayList <String>();
-		working.add("grid " + TILE_WIDTH + " " + TILE_HEIGHT);
-		Sprite newSprite = new Sprite (path,new SpriteParser(working));
-		int toAdd = newSprite.getFrameCount();	
-		for (int i = 0; i < toAdd; i++) {
-			String [] fork = path.split("/|\\\\"); // dude thats deep
-			String spoon = fork[fork.length -1].substring(0, fork[fork.length - 1].length() - 4); //oh god why?
-			String tileName = spoon + "." + i;
-			TileData current = new TileData (tileName);
-			dataList.add(current);
-			nameList.put(tileName, current);
-			BufferedImage tile = newSprite.getFrame(i);
-			tileIcons.add(tile);
-		}
+	public static void importTileset(JSONObject tileset) {
+		
+		if (tileset != null) {
+			
+			//Load the sprite and get its BufferedImage
+			File f = new File (tileset.getString ("image"));
+			System.out.println (f.getName ());
+			String tileId = f.getName ().split ("\\.")[0];
+			Sprite tilesImg = new Sprite ("resources/tilesets/" + f.getName ());
+			BufferedImage rawImg = tilesImg.getFrame (0);
+			int tileCount = tileset.getInt ("tilecount");
+			
+			//Populate the tile array from the source image
+			int numColumns = tileset.getInt ("columns");
+			int tIndex = 0;
+			int wy = 0;
+			while (tIndex < tileCount) {
+				for (int wx = 0; wx < numColumns && tIndex < tileCount; wx++) {
+					//Parse out the tile here
+					BufferedImage tileImg = rawImg.getSubimage (tileWidth * wx, tileHeight * wy, tileWidth, tileHeight);
+					TileData current = new TileData (tileId);
+					dataList.add(current);
+					nameList.put(tileId, current);
+					BufferedImage tile = tileImg;
+					tileIcons.add(tile);
+					tIndex++;
+				}
+				wy++;
+			}
+			
 		} else {
+			
 			TileData current = new TileData ("_NULL");
 			dataList.add(current);
 			nameList.put("_NULL", current);
 			Sprite newSprite = new Sprite ("resources/tilesets/transparent.png");
 			BufferedImage tile = newSprite.getFrame(0);
 			tileIcons.add(tile);
+			
 		}
+
 	}
+	
 	private static String getString (int length) {
 		byte[] usedData = new byte[length];
 		int endPos = readPos + length;
@@ -975,7 +917,7 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 	 * @return info about the tile specified
 	 */
 	public static TileData getTileProperties(int layer, int x, int y) {
-		return dataList.get(tileData[layer][y][x]);
+		return dataList.get(getTile (layer, x, y));
 	}
 	/**
 	 * returns the name of a speicfic tile
@@ -986,7 +928,7 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 	 */
 	public static String getTileName (int layer, int x, int y) {
 		try {
-		return dataList.get(tileData[layer][y][x]).getName();
+		return dataList.get(getTile (layer, x, y)).getName();
 		} catch (IndexOutOfBoundsException e) {
 		long working = toPackedLong (x,y);
 		return positionToEntitiys.get(working).getType();
@@ -1043,6 +985,220 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 	 */
 	public static ArrayList<GameObject> getObjectCollisionInfo () {
 		return mapObjectsUsed;
+	}
+	
+	public static void loadGlobalProperties (JSONObject mapData) {
+		
+		//Map width and height
+		mapWidth = mapData.getInt ("width");
+		mapHeight = mapData.getInt ("height");
+		
+		//Tile width and height
+		tileWidth = mapData.getInt ("tilewidth");
+		tileHeight = mapData.getInt ("tileheight");
+		
+		//Other global properties of the map are unimportant/reserved for use by Tiled
+		
+	}
+	
+	public static void loadMapTilesets (JSONObject mapData) {
+		importTileset (null);
+		JSONArray mapSets = mapData.getJSONArray ("tilesets");
+		for (int i = 0; i < mapSets.getContents ().size (); i++) {
+			String fname = ((JSONObject)mapSets.get (i)).getString ("source");
+			String path = "resources/tilesets/" + fname;
+			try {
+				JSONObject tsJSON = JSONUtil.loadJSONFile (path);
+				importTileset (tsJSON);
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static void loadMapLayers (JSONObject mapData) {
+		JSONArray mapLayers = mapData.getJSONArray ("layers");
+		numLayers = mapLayers.getContents ().size ();
+		for (int i = 0; i < mapLayers.getContents ().size (); i++) {
+			MapLayer working = new MapLayerFactory ((JSONObject)mapLayers.get (i)).newMapLayer ();
+			loadLayer (working);
+		}
+	}
+	
+	public static ArrayList<MapLayer> getMapLayers () {
+		
+		//Create the loaded tile list if it doesn't exist
+		if (layerData == null) {
+			layerData = new ArrayList<MapLayer> ();
+		}
+		
+		//Return the tile list
+		return layerData;
+		
+	}
+	
+	public static ArrayList<MapObject> getMapObjectsList () {
+		
+		//Create the map objects list if it doesn't exist
+		if (allMapObjs == null) {
+			allMapObjs = new ArrayList<MapObject> ();
+		}
+		
+		//Return the object list
+		return allMapObjs;
+		
+	}
+	
+	public static HashMap<String, MapObject> getMapObjectsMap () {
+		
+		//Create the map objects list if it doesn't exist
+		if (mapObjNameMap == null) {
+			mapObjNameMap = new HashMap<String, MapObject> ();
+		}
+		
+		//Return the object list
+		return mapObjNameMap;
+		
+	}
+	
+	public static void loadLayer (MapLayer layer) {
+		getMapLayers ().add (layer);
+	}
+	
+	public static void spawnAllObjs () {
+		
+		for (int i = 0; i < getMapObjectsList ().size (); i++) {
+			MapObject curr = getMapObjectsList ().get (i);
+			if (curr.getType ().equals ("tile")) {
+				int tileTypeID = curr.getTile ();
+				String objTypename = dataList.get (i).getFName ();
+				GameObject newObj = ObjectHandler.getInstance (objTypename);
+				if (newObj != null) {
+					newObj.declare (curr.pos.x, curr.pos.y);
+					if (curr.getRawProperties () != null) {
+						//Set all the variant attributes as needed
+						JSONArray propertyArr = curr.getRawProperties ();
+						for (int j = 0; j < propertyArr.getContents ().size (); j++) {
+							JSONObject working = (JSONObject)propertyArr.get (j);
+							newObj.setVariantAttribute (working.getString ("name"), working.getString ("value")); //TODO use the type parameter? (probably not since variants are all Strings)
+						}
+					}
+				} else {
+					System.out.println ("Error: failed to instantiate object of type " + objTypename + " for MapObject " + curr.getId ());
+				}
+			}
+		}
+		
+	}
+	
+	public static class MapLayerFactory extends MapLayer {
+
+		private JSONObject layer;
+		
+		public MapLayerFactory (JSONObject layer) {
+			super ();
+			this.layer = layer;
+		}
+		
+		public MapLayer newMapLayer () {
+			
+			String layerType = layer.getString ("type");
+			System.out.println (layerType);
+			
+			switch (layerType) {
+				case "tilelayer":
+					return new TileLayer (layer);
+				case "objectgroup":
+					return new ObjectLayer (layer);
+				case "imagelayer":
+					return new ImageLayer (layer);
+				default:
+					System.out.println ("ERR: layer type not supported");
+					return null;
+			}
+			
+		}
+
+		@Override
+		public String getTypeId () {
+			return null;
+		}
+		
+	}
+	
+	public static class TileLayer extends MapLayer {
+		
+		private String layerType;
+		
+		private int[][] tileData;
+		
+		public TileLayer (JSONObject layer) {
+			
+			super (layer);
+			
+			//Processing for tile layer
+			tileData = new int[mapHeight][mapWidth];
+			JSONArray layerData = layer.getJSONArray ("data");
+			for (int wy = 0; wy < mapHeight; wy++) {
+				for (int wx = 0; wx < mapWidth; wx++) {
+					tileData[wy][wx] = (int)layerData.get (wy * mapWidth + wx);
+				}
+			}
+			
+		}
+		
+		@Override
+		public String getTypeId () {
+			return "tilelayer";
+		}
+		
+	}
+	
+	public static class ObjectLayer extends MapLayer {
+		
+		//TODO store objects in layer instead of map?
+		
+		public ObjectLayer (JSONObject layer) {
+			
+			super (layer);
+			
+			JSONArray objs = layer.getJSONArray ("objects");
+			for (int i = 0; i < objs.getContents ().size (); i++) {
+				JSONObject curr = (JSONObject)objs.get (i);
+				MapObject newObj = new MapObject (curr);
+				getMapObjectsList ().add (newObj);
+				if (!newObj.getName ().equals ("")) {
+					getMapObjectsMap ().put (newObj.getName (), newObj);
+				}
+			}
+			
+		}
+
+		@Override
+		public String getTypeId () {
+			return "objectgroup";
+		}
+		
+	}
+	
+	public static class ImageLayer extends MapLayer {
+		
+		private String layerType;
+		
+		public ImageLayer (JSONObject layer) {
+			
+			super (layer);
+			
+			//TODO
+			
+		}
+		
+		@Override
+		public String getTypeId () {
+			return "imagelayer";
+		}
+		
 	}
 	
 	//its a map chunk ... a big map chunk
@@ -1136,30 +1292,32 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 		 * @return whearer or not this layer can be rendered with all the rest
 		 */
 		public boolean isSpecialLayer (int layerNum) {
-			if (backgrounds.get(layerNum) != null) {
-				if (backgrounds.get(layerNum).getScrollRateHorizontal() != 1 || backgrounds.get(layerNum).getScrollRateVertical() != 1 || backgrounds.get(layerNum).getFrames ().size () > 1){
-					return true;
-				}
+			if (layerData.get (layerNum) instanceof ImageLayer) {
+				//TODO fix this pls
+				return false;
+				//if (backgrounds.get(layerNum).getScrollRateHorizontal() != 1 || backgrounds.get(layerNum).getScrollRateVertical() != 1 || backgrounds.get(layerNum).getFrames ().size () > 1){
+				//	return true;
+				//}
 			} else {
 				for (int wx = 0; wx < width; wx++) {
 					for (int wy = 0; wy < height; wy++) {
 						if (! ((wx + x > width) || wy + y > height )) {
-							if (tileData[layerNum][wy + y][wx + x] == SPECIAL_TILE_ID) {
+							if (getTile (layerNum, wx + x, wy + y) == SPECIAL_TILE_ID) {
 								return true;
 							}	
 						} else {
 							if (wx + x > width) {
 								if (wy + y > height) {
-									if (tileData[layerNum][height][width] == SPECIAL_TILE_ID) {
+									if (getTile (layerNum, width, height) == SPECIAL_TILE_ID) {
 										return true;
 									}	
 								} else {
-									if (tileData[layerNum][wy + y][width] == SPECIAL_TILE_ID) {
+									if (getTile (layerNum, width, wy + y) == SPECIAL_TILE_ID) {
 										return true;
 									}	
 								}
 							} else {
-								if (tileData[layerNum][height][wx + x] == SPECIAL_TILE_ID) {
+								if (getTile (layerNum, wx + x, height) == SPECIAL_TILE_ID) {
 									return true;
 								}
 							}
@@ -1252,31 +1410,32 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 			}
 				for (int l = renderedImages.size()-1; l >=0; l--) {
 					if (!this.isValid(l)) {
-						renderedImages.set(l,new BufferedImage (chungusWidth*TILE_HEIGHT,chungusWidth*TILE_HEIGHT,BufferedImage.TYPE_4BYTE_ABGR));
+						renderedImages.set(l,new BufferedImage (chungusWidth*tileHeight,chungusWidth*tileHeight,BufferedImage.TYPE_4BYTE_ABGR));
 						Graphics g = renderedImages.get(l).getGraphics();
 						while (layerClassfications.get(currentLayer)>=l) {
-							if (backgrounds.get(currentLayer) == null) {
+							if (layerData.get (currentLayer) instanceof TileLayer) {
 							for (int wx = 0; wx < width; wx++) {
 								for (int wy = 0; wy < height; wy++) {
-									if (tileData[currentLayer][wy + y][wx + x] == SPECIAL_TILE_ID){
-										g.drawImage(positionToEntitiys.get(toPackedLong(wx + x,wy + y)).getTexture(),wx*TILE_WIDTH,wy*TILE_HEIGHT,null);
+									if (getTile (currentLayer, wx + x, wy + y) == SPECIAL_TILE_ID){
+										g.drawImage(positionToEntitiys.get(toPackedLong(wx + x,wy + y)).getTexture(),wx*tileWidth,wy*tileHeight,null);
 									
 									} else {
-										g.drawImage(tileIcons.get(tileData[currentLayer][wy + y][wx + x]),wx*TILE_HEIGHT,wy*TILE_WIDTH,null);
+										g.drawImage(tileIcons.get(getTile (currentLayer, wx + x, wy + y)),wx*tileHeight,wy*tileWidth,null);
 									}
 								}
 							}
 							} else {
 								//TODO get this to work with animated backgrounds
-								int rasterWidth = Math.min (x*TILE_WIDTH + chungusWidth*TILE_WIDTH,mapWidth*TILE_WIDTH);
-								int rasterHeight = Math.min (y*TILE_HEIGHT + chungusHeight*TILE_HEIGHT,mapHeight*TILE_HEIGHT);
-								rasterWidth = Math.min(rasterWidth, backgrounds.get(currentLayer).getWidth()) - x*TILE_WIDTH;
-								rasterHeight = Math.min(rasterHeight, backgrounds.get(currentLayer).getHeight()) - y*TILE_HEIGHT;
+								//ALSO fix this pls
+								/*int rasterWidth = Math.min (x*tileWidth + chungusWidth*tileWidth,mapWidth*tileWidth);
+								int rasterHeight = Math.min (y*tileHeight + chungusHeight*tileHeight,mapHeight*tileHeight);
+								rasterWidth = Math.min(rasterWidth, backgrounds.get(currentLayer).getWidth()) - x*tileWidth;
+								rasterHeight = Math.min(rasterHeight, backgrounds.get(currentLayer).getHeight()) - y*tileHeight;
 								if (rasterWidth > 0 && rasterHeight > 0){
 									int backgroundFrame = backgrounds.get(currentLayer).getCurrentFrame();
-									BufferedImage working = backgrounds.get(currentLayer).getFrames ().get(backgroundFrame).getSubimage(x*TILE_WIDTH, y*TILE_HEIGHT, rasterWidth, rasterHeight);
+									BufferedImage working = backgrounds.get(currentLayer).getFrames ().get(backgroundFrame).getSubimage(x*tileWidth, y*tileHeight, rasterWidth, rasterHeight);
 									g.drawImage(working,0,0,null);
-								}
+								}*/
 							}
 							valid.set(layerClassfications.get(l), true);
 							currentLayer = currentLayer - 1;
@@ -1289,8 +1448,185 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 				
 				for (int l = renderedImages.size()-1; l >=0; l--) {
 					Graphics g = RenderLoop.wind.getBufferGraphics();
-					g.drawImage(renderedImages.get(l),x*TILE_WIDTH - scrollX, y*TILE_HEIGHT - scrollY,null);
+					g.drawImage(renderedImages.get(l),x*tileWidth - scrollX, y*tileHeight - scrollY,null);
 			}
 		}	
+	}
+	
+	public static class MapObject extends GameObject {
+		
+		private int id;
+		
+		private double width;
+		private double height;
+		private Point pos;
+		private ArrayList<Point> vertices;
+		private String type;
+		private int tileId;
+		private String text;
+		private JSONArray properties;
+		private String name;
+		
+		public MapObject (JSONObject params) {
+			assignType (params);
+			loadProperties (params);
+			if (SHOW_MAP_OBJS) {
+				declare ();
+				this.setRenderPriority (-1000000);
+			}
+		}
+		
+		public void assignType (JSONObject params) {
+			
+			if (params.get ("polygon") != null) {
+				type = "polygon";
+			} else if (params.get ("polyline") != null) {
+				type = "polyline";
+			} else if (params.get ("text") != null) {
+				type = "text";
+			} else if (params.get ("gid") != null) {
+				type = "tile";
+			} else if (params.get ("ellipse") != null && params.get ("ellipse").equals (Boolean.TRUE)) {
+				type = "ellipse";
+			} else if (params.get ("point") != null && params.get ("point").equals (Boolean.TRUE)) {
+				type = "point";
+			} else {
+				//Rectangle by default
+				type = "rectangle";
+			}
+			
+		}
+		
+		public void loadProperties (JSONObject params) {
+			id = params.getInt ("id");
+			pos = new Point (params.getDouble ("x"), params.getDouble ("y"));
+			width = params.getDouble ("width");
+			height = params.getDouble ("height");
+			properties = (JSONArray)params.get ("properties");
+			name = (String)params.get ("name");
+			JSONArray pts;
+			switch (type) {
+				case "polygon":
+					vertices = new ArrayList<Point> ();
+					pts = params.getJSONArray ("polygon");
+					for (int i = 0; i < pts.getContents ().size (); i++) {
+						JSONObject pt = (JSONObject)pts.get (i);
+						vertices.add (new Point (pt.getDouble ("x"), pt.getDouble ("y")));
+					}
+					break;
+				case "polyline":
+					vertices = new ArrayList<Point> ();
+					pts = params.getJSONArray ("polyline");
+					for (int i = 0; i < pts.getContents ().size (); i++) {
+						JSONObject pt = (JSONObject)pts.get (i);
+						vertices.add (new Point (pt.getDouble ("x"), pt.getDouble ("y")));
+					}
+					break;
+				case "text":
+					text = params.getJSONObject ("text").getString ("text");
+					break;
+				case "tile":
+					tileId = params.getInt ("gid");
+					pos.y -= height; //For some reason, tiles SPECIFICALLY and ONLY TILES use their bottom-left corner for their position
+					break;
+				case "ellipse":
+					//Nothing to do here
+					break;
+				case "point":
+					//Also nothing to do here
+					break;
+				case "rectangle":
+					//Still nothing to do here
+					break;
+				default:
+					break;
+			}
+		}
+		
+		public boolean hasName () {
+			return name == null;
+		}
+		
+		public String getName () {
+			return name;
+		}
+		
+		public int getId () {
+			return id;
+		}
+		
+		public String getType () {
+			return type;
+		}
+		
+		public Point getPos () {
+			return pos;
+		}
+		
+		public int getTile () {
+			return tileId;
+		}
+		
+		public ArrayList<Point> getVertices () {
+			return vertices;
+		}
+		
+		public JSONArray getRawProperties () {
+			return properties;
+		}
+		
+		@Override
+		public void draw () {
+			Graphics2D g = (Graphics2D)RenderLoop.wind.getBufferGraphics ();
+			g.setColor (Color.BLACK);
+			switch (type) {
+			case "polygon":
+				for (int i = 0; i < vertices.size (); i++) {
+					Point fromPt = vertices.get (i);
+					Point toPt = vertices.get ((i + 1) % vertices.size ());
+					g.drawLine ((int)(pos.x + fromPt.x), (int)(pos.y + fromPt.y), (int)(pos.x + toPt.x), (int)(pos.y + toPt.y));
+				}
+				break;
+			case "polyline":
+				for (int i = 0; i < vertices.size () - 1; i++) {
+					Point fromPt = vertices.get (i);
+					Point toPt = vertices.get ((i + 1) % vertices.size ());
+					g.drawLine ((int)(pos.x + fromPt.x), (int)(pos.y + fromPt.y), (int)(pos.x + toPt.x), (int)(pos.y + toPt.y));
+				}
+				break;
+			case "text":
+				g.drawString (text, (int)pos.x, (int)pos.y);
+				break;
+			case "tile":
+				//Don't draw tile objects
+				//Sprite spr = tiles.get (tileId).getSprite ();
+				//g.drawImage (spr.getFrame (0), (int)pos.x, (int)pos.y, (int)(pos.x + width), (int)(pos.y + height), 0, 0, spr.getWidth (), spr.getHeight (), null);
+				break;
+			case "ellipse":
+				g.drawOval ((int)pos.x, (int)pos.y, (int)width, (int)height);
+				break;
+			case "point":
+				g.fillRect ((int)pos.x - 2, (int)pos.y - 2, 4, 4);
+				break;
+			case "rectangle":
+				g.drawRect ((int)pos.x, (int)pos.y, (int)width, (int)height);
+				break;
+			default:
+				break;
+			}
+		}
+
+	}
+	
+	private static class Point {
+		
+		public double x;
+		public double y;
+		
+		public Point (double x, double y) {
+			this.x = x;
+			this.y = y;
+		}
+		
 	}
 }
