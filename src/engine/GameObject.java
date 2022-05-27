@@ -441,6 +441,10 @@ public abstract class GameObject extends GameAPI {
 	public void pausedEvent() {
 		
 	}
+	
+	public void gettingSploded() {
+		
+	}
 	private boolean runPixelCollsions (GameObject pixelObject, Rectangle hitboxObject) {
 		Raster mask;
 		mask = pixelObject.getAnimationHandler().getImage().getFrame(pixelObject.getAnimationHandler().getFrame()).getAlphaRaster();

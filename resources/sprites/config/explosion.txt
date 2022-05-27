@@ -1,0 +1,3 @@
+$src resources/sprites/explosion.png
+
+ grid 27 26

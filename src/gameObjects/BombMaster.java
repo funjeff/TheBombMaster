@@ -3,6 +3,7 @@ package gameObjects;
 import javax.swing.plaf.basic.BasicComboBoxUI.KeyHandler;
 
 import engine.GameObject;
+import engine.ObjectHandler;
 import engine.Sprite;
 
 import java.awt.event.KeyEvent;
@@ -119,7 +120,7 @@ public class BombMaster extends GameObject {
 					beingThrown.setY(this.getY() + 9);
 				}
 				
-				if (this.getAnimationHandler().getFrame() == 6 && beingThrown != null) {
+				if (this.getAnimationHandler().getFrame() >= 6 && beingThrown != null) {
 					beingThrown.setX(this.getX() + 6);
 					beingThrown.setY(this.getY() + 2);
 					
@@ -152,7 +153,7 @@ public class BombMaster extends GameObject {
 					beingThrown.setY(this.getY() + 10);
 				}
 				
-				if (this.getAnimationHandler().getFrame() == 8 && beingThrown != null) {
+				if (this.getAnimationHandler().getFrame() >= 8 && beingThrown != null) {
 					beingThrown.setX(this.getX() - 16);
 					beingThrown.setY(this.getY() + 20);
 					
@@ -180,7 +181,7 @@ public class BombMaster extends GameObject {
 					beingThrown.setY(this.getY() + 3);
 				}
 				
-				if (this.getAnimationHandler().getFrame() == 7 && beingThrown != null) {
+				if (this.getAnimationHandler().getFrame() >= 7 && beingThrown != null) {
 					beingThrown.setX(this.getX() + 21);
 					beingThrown.setY(this.getY() + 7);
 					
@@ -207,7 +208,7 @@ public class BombMaster extends GameObject {
 					beingThrown.setY(this.getY() + 3);
 				}
 				
-				if (this.getAnimationHandler().getFrame() == 7 && beingThrown != null) {
+				if (this.getAnimationHandler().getFrame() >= 7 && beingThrown != null) {
 					beingThrown.setX(this.getX() -16);
 					beingThrown.setY(this.getY() + 7);
 					
@@ -234,7 +235,7 @@ public class BombMaster extends GameObject {
 					beingThrown.setY(this.getY() + 4);
 				}
 				
-				if (this.getAnimationHandler().getFrame() == 6 && beingThrown != null) {
+				if (this.getAnimationHandler().getFrame() >= 6 && beingThrown != null) {
 					beingThrown.setX(this.getX() -12);
 					beingThrown.setY(this.getY() + 18);
 					
@@ -260,7 +261,7 @@ public class BombMaster extends GameObject {
 					beingThrown.setY(this.getY() + 4);
 				}
 				
-				if (this.getAnimationHandler().getFrame() == 6 && beingThrown != null) {
+				if (this.getAnimationHandler().getFrame() >= 6 && beingThrown != null) {
 					beingThrown.setX(this.getX() +28);
 					beingThrown.setY(this.getY() + 18);
 					
@@ -291,7 +292,7 @@ public class BombMaster extends GameObject {
 					beingThrown.setY(this.getY() + 4);
 					
 				}
-				if (this.getAnimationHandler().getFrame() == 8 && beingThrown != null) {
+				if (this.getAnimationHandler().getFrame() >= 8 && beingThrown != null) {
 					beingThrown.setX(this.getX() +29);
 					beingThrown.setY(this.getY() + 6);
 					
@@ -322,7 +323,7 @@ public class BombMaster extends GameObject {
 					beingThrown.setY(this.getY() + 4);
 					
 				}
-				if (this.getAnimationHandler().getFrame() == 8 && beingThrown != null) {
+				if (this.getAnimationHandler().getFrame() >= 8 && beingThrown != null) {
 					beingThrown.setX(this.getX() -13);
 					beingThrown.setY(this.getY() + 6);
 					
@@ -495,6 +496,11 @@ public class BombMaster extends GameObject {
 			
 			
 		
+	}
+	
+	@Override
+	public void gettingSploded() {
+		((Hud)(ObjectHandler.getObjectsByName("Hud").get(0))).breakHeart();
 	}
 	
 //	public void setIdleLegs() {

@@ -17,6 +17,7 @@ import java.util.Scanner;
 
 import gameObjects.Bomb;
 import gameObjects.BombMaster;
+import gameObjects.Hud;
 import map.Room;
 import map.Room2;
 
@@ -45,10 +46,12 @@ public class GameCode {
 		BombMaster mast = new BombMaster ();
 		mast.declare();
 		
+		Hud hud = new Hud();
+		hud.declare();
 		
 		//Test
-		Room2 room2 = new Room2 ();
-		room2.loadMap ("big_test.tmj");
+		//Room2 room2 = new Room2 ();
+		//room2.loadMap ("big_test.tmj");
 	}
 		
 	

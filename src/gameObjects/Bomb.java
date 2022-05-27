@@ -1,5 +1,7 @@
 package gameObjects;
 
+import java.util.Random;
+
 import engine.GameObject;
 import engine.Sprite;
 
@@ -17,7 +19,7 @@ public class Bomb extends GameObject {
 	
 	int fuseThird;
 	
-	int bombTimer = 120;
+	int bombTimer = 40;
 	
 	double direction;
 	
@@ -31,15 +33,28 @@ public class Bomb extends GameObject {
 	public void frameEvent() {
 		bombTimer = bombTimer - 1;
 		
-		if (bombTimer == 80) {
+		if (bombTimer == 28) {
 			fuseThird = 1;
 		}
 		
-		if (bombTimer == 40) {
+		if (bombTimer == 12) {
 			fuseThird = 2;
 		}
 		
 		if (bombTimer == 0) {
+			Explosion boom = new Explosion();
+			boom.declare(this.getX(),this.getY());
+			
+			Random r = new Random ();
+			
+			int fragNum = r.nextInt(7) + 3;
+			
+			for (int i = 0; i < fragNum; i++) {
+				BombFragment frag = new BombFragment();
+				frag.launchFrag( r.nextDouble()*2*Math.PI, r.nextInt(10) + 1);
+				frag.declare(this.getX(),this.getY());
+			}
+			
 			this.forget(); //TODO explosion
 		}
 		
