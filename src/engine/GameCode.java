@@ -1,15 +1,23 @@
 package engine;
 
+import gameObjects.Bat;
 import gameObjects.BombMaster;
+import gameObjects.Bombhog;
+import gameObjects.CactusDude;
+import gameObjects.Heart;
 import gameObjects.Hud;
+import gameObjects.MachineBomber;
 import map.Room;
-import map.Room2;
+
 
 
 public class GameCode {
 	
 	static int veiwX;
 	static int veiwY;
+	
+	static BombMaster mast;
+
 	
 
 	public static void testBitch () {
@@ -28,20 +36,35 @@ public class GameCode {
 	public static void init () {
 		
 		//Test
-		Room.loadRoom ("big_test.tmj");
+		//Room.loadRoom ("big_test.tmj");
 		
-		BombMaster mast = new BombMaster ();
+		mast = new BombMaster ();
 		mast.declare();
 		
-<<<<<<< HEAD
+
 		Hud hud = new Hud();
 		hud.declare();
+		
+//		Bat b = new Bat();
+//		b.declare(300,200);
+
+//		CactusDude c = new CactusDude();
+//		c.declare(300,100);
+
+//		Bombhog h = new Bombhog();
+//		h.declare(400,200);
+		
+//		Heart h = new Heart ();
+//		h.declare(350,250);
+//		
+		
+		MachineBomber mb = new MachineBomber();
+		mb.declare(400,200);
 		
 		//Test
 		//Room2 room2 = new Room2 ();
 		//room2.loadMap ("big_test.tmj");
-=======
->>>>>>> 3fff26d8215b102742f4866a8f35708f0ae367cf
+
 	}
 		
 	
@@ -88,6 +111,10 @@ public class GameCode {
 
 	public static void setViewY(int newVeiwY) {
 		veiwY = newVeiwY;
+	}
+	
+	public static BombMaster getBombMaster() {
+		return mast;
 	}
 
 

@@ -49,19 +49,16 @@ public class Hud extends GameObject {
 	public void healHeart() {
 		if (health != hearts.size() -1) {
 			health = health + 1;
-			
-			hearts.get(health).healHeart();
-			
+			hearts.get(health).healHeart();	
 		}
 	}
 	
 	public void breakHeart() {
 		if (health != 0) {
-			health = health - 1;
-			
 			hearts.get(health).takeDamage();
-			
+			health = health - 1;
 		} else {
+			hearts.get(health).takeDamage();
 			//TODO game over
 		}
 	}

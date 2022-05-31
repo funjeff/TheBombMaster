@@ -13,8 +13,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Random;
 
-
+import gameObjects.Fragment;
 import map.Room;
 
 /**
@@ -142,7 +143,10 @@ public abstract class GameObject extends GameAPI {
 	
 	double prevAngle;
 	
-	Point iris;
+	double direction = -1;
+	double speed = 0;
+	
+	protected Point iris;
 	
 	private Point focusPoint = null;
 	
@@ -384,19 +388,22 @@ public abstract class GameObject extends GameAPI {
 			if (iris == null) {
 				iris = new Point (0, this.getSprite().getHeight()/2);
 			}
+		
 			angle = Math.atan2(focusPoint.getY() - (iris.y + this.getY()), focusPoint.getX() - (iris.x + this.getX()));
 			
-			if ((angle != prevAngle && angle != -prevAngle)) {
+			//if ((angle != prevAngle && angle != -prevAngle)) {
 				
 				if (lookingMode == 1) {
 					this.getSprite().drawRotated((int)this.getX() - Room.getViewX(), (int)this.getY() - Room.getViewY(), this.getAnimationHandler().getFrame(), this.getSprite().getWidth()/2, this.getSprite().getHeight()/2, angle - Math.PI);
 				} else {
 					this.getSprite().drawRotated((int)this.getX() - Room.getViewX(), (int)this.getY() - Room.getViewY(), this.getAnimationHandler().getFrame(), this.getSprite().getWidth()/2, this.getSprite().getHeight()/2, angle);
 				}
-				
-				angle = prevAngle;
-				iris = new Point ((int) (this.getSprite().getWidth()/2 + (iris.x - this.getSprite().getWidth()/2)*Math.cos(angle) - (iris.y - this.getSprite().getHeight()/2) * Math.sin(angle)), (int) (this.getSprite().getHeight()/2 + (iris.x - this.getSprite().getWidth()/2)*Math.sin(angle) + (iris.y - this.getSprite().getHeight()/2)*Math.cos(angle))); 
-			}
+				//prevAngle = angle;
+				//double circleRadius = Math.sqrt(Math.pow(this.getSprite().getWidth(), 2) + Math.pow(this.getSprite().getHeight(), 2));
+				//iris = new Point ((int)(Math.cos(angle) * circleRadius),(int)(Math.sin(angle) *circleRadius)); 
+				//iris = new Point ((int) (this.getSprite().getWidth()/2 + (iris.x - this.getSprite().getWidth()/2)*Math.cos(angle) - (iris.y - this.getSprite().getHeight()/2) * Math.sin(angle)), (int) (this.getSprite().getHeight()/2 + (iris.x - this.getSprite().getWidth()/2)*Math.sin(angle) + (iris.y - this.getSprite().getHeight()/2)*Math.cos(angle))); 
+				//System.out.println((int)(Math.cos(angle) * circleRadius));
+			//}
 		}
 			if (hiboxBorders) {
 				if (this.hitbox() != null) {
@@ -435,7 +442,10 @@ public abstract class GameObject extends GameAPI {
 	 * Runs at every iteration of GameLoop
 	 */
 	public void frameEvent () {
-		
+		if (direction != -1) {
+			this.setX(this.getX() + (Math.cos(direction)*speed));
+			this.setY(this.getY() - (Math.sin(direction)*speed));
+		}
 	}
 	//Runs when the game is paused
 	public void pausedEvent() {
@@ -445,6 +455,41 @@ public abstract class GameObject extends GameAPI {
 	public void gettingSploded() {
 		
 	}
+	
+	public void breakToFragments(String fragName) {
+		breakToFragments(fragName,3,10,1,10,0,0);
+	}
+	
+	public void breakToFragments(String fragName, int minFrags, int maxFrags) {	
+		breakToFragments(fragName,minFrags,maxFrags,1,10,0,0);
+	}
+	
+	public void breakToFragments(String fragName, int minFrags, int maxFrags, int minSpeed, int maxSpeed) {
+		
+		breakToFragments(fragName,minFrags,maxFrags,minSpeed,maxSpeed,0,0);
+		
+	}
+	
+	public void breakToFragments(String fragName, int minFrags, int maxFrags, int minSpeed, int maxSpeed, int fragOffsetX, int fragOffsetY) {
+		
+		Random r = new Random ();
+		
+		int fragNum;
+		
+		if (maxFrags == 1) {
+			fragNum = 1;
+		} else {
+			fragNum = r.nextInt(maxFrags-minFrags) + minFrags;
+		}
+		
+		for (int i = 0; i < fragNum; i++) {
+			Fragment frag = new Fragment(fragName);
+			frag.throwObj( r.nextDouble()*2*Math.PI, r.nextInt(maxSpeed - minSpeed) + minSpeed);
+			frag.declare(this.getX() + fragOffsetX,this.getY() + fragOffsetY);
+		}
+		
+	}
+	
 	private boolean runPixelCollsions (GameObject pixelObject, Rectangle hitboxObject) {
 		Raster mask;
 		mask = pixelObject.getAnimationHandler().getImage().getFrame(pixelObject.getAnimationHandler().getFrame()).getAlphaRaster();
@@ -510,6 +555,11 @@ public abstract class GameObject extends GameAPI {
 			}
 		}
 		return false;
+	}
+	
+	public void throwObj (double direction, double speed) {
+		this.direction = direction;
+		this.speed = speed;
 	}
 	/**
 	 * uses the rotate method in animation handler to rotate the sprite also adjusts the hitbox to match (kinda)
@@ -992,20 +1042,6 @@ public abstract class GameObject extends GameAPI {
 	 */
 	public void onForget () {
 		
-	}
-	/**
-	 * override to write code that is run whenever Jeffrey moves
-	 */
-	public void onJeffreyPosChange() {
-		
-	}
-	public static void onJeffreyPosChangeReal() {
-		ArrayList<ArrayList<GameObject>> working = ObjectHandler.getChildrenByName("GameObject");
-		for (int i = 0; i <working.size();i++) {
-			for (int j = 0; j < working.get(i).size(); j++) {
-				working.get(i).get(j).onJeffreyPosChange();
-			}
-		}
 	}
 
 	public boolean isVisable () {

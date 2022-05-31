@@ -17,6 +17,15 @@ public class Explosion extends GameObject {
 		this.getAnimationHandler().setFrameTime(33);
 	}
 	
+	public Explosion (double size) {
+		this.setHitboxAttributes(26 * size, 27 * size);
+		Sprite unscaled = new Sprite ("resources/sprites/config/explosion.txt");
+		Sprite.scale(unscaled,(int)(26*size),(int)(27*size));
+		this.setSprite(unscaled);
+		this.getAnimationHandler().setFrameTime(33);
+	}
+	
+	
 	@Override
 	public void frameEvent() {
 		
@@ -24,7 +33,7 @@ public class Explosion extends GameObject {
 			curFrame = this.getAnimationHandler().getFrame();
 		}
 		
-		if (this.getAnimationHandler().getFrame() < curFrame) {
+		if (this.getAnimationHandler().getFrame() < curFrame || this.getAnimationHandler().getFrame() == 5) {
 			this.forget();
 		}
 		
