@@ -45,21 +45,21 @@ public class GameCode {
 		Hud hud = new Hud();
 		hud.declare();
 		
-//		Bat b = new Bat();
-//		b.declare(300,200);
+		Bat b = new Bat();
+		b.declare(300,200);
 
 //		CactusDude c = new CactusDude();
 //		c.declare(300,100);
 
 //		Bombhog h = new Bombhog();
-//		h.declare(400,200);
+//		h.declare(200,200);
 		
 //		Heart h = new Heart ();
 //		h.declare(350,250);
 //		
 		
-		MachineBomber mb = new MachineBomber();
-		mb.declare(400,200);
+//		MachineBomber mb = new MachineBomber();
+//		mb.declare(400,200);
 		
 		//Test
 		//Room2 room2 = new Room2 ();
