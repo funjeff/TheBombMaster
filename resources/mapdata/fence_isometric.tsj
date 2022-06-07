@@ -1,5 +1,5 @@
 { "columns":7,
- "image":"..\/..\/git\/TheBombMaster\/resources\/tilesets\/fence_isometric.png",
+ "image":"fence_isometric.png",
  "imageheight":16,
  "imagewidth":112,
  "margin":0,

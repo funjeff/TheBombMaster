@@ -17,7 +17,7 @@ public class JSONObject {
 	public JSONObject (String value) throws JSONException {
 		//Parse the input text to remove whitespace
 		values = new HashMap<String, Object> ();
-		String noWhitespace = "";
+		StringBuilder noWhitespaceBuilder = new StringBuilder ();
 		boolean remove = true;
 		long ct = System.nanoTime ();
 		for (int i = 0; i < value.length(); i ++) {
@@ -25,9 +25,10 @@ public class JSONObject {
 				remove = !remove;
 			}
 			if (!remove || !Character.isWhitespace(value.charAt(i))) {
-				noWhitespace = noWhitespace + value.charAt(i);
+				noWhitespaceBuilder.append (value.charAt(i));
 			}
 		}
+		String noWhitespace = noWhitespaceBuilder.toString ();
 		if (noWhitespace.charAt (0) == '{' && noWhitespace.charAt (noWhitespace.length () - 1) == '}') {
 			noWhitespace = noWhitespace.substring (1, noWhitespace.length () - 1);
 		} else {
@@ -37,13 +38,15 @@ public class JSONObject {
 		//Main parsing loop
 		int i = 0;
 		while (i < noWhitespace.length ()) {
-			String key = "";
-			String working = "";
+			String key;
+			StringBuilder keyBuilder = new StringBuilder ();
+			StringBuilder working;
 			
 			//Parse out key
 			while (noWhitespace.charAt (i) != ':') {
-				key += noWhitespace.charAt (i++);
+				keyBuilder.append (noWhitespace.charAt (i++));
 			}
+			key = keyBuilder.toString ();
 			if (key.charAt (0) == '\"' && key.charAt (key.length () - 1) == '\"') {
 				key = key.substring (1, key.length () - 1);
 			} else {
@@ -54,7 +57,8 @@ public class JSONObject {
 			//Parse out value
 			if (noWhitespace.charAt (i) == '{') {
 				//Value is a JSONObject
-				working = "{";
+				working = new StringBuilder ();
+				working.append ("{");
 				i++;
 				int bracketCount = 1;
 				while (true) {
@@ -63,22 +67,23 @@ public class JSONObject {
 					} else if (noWhitespace.charAt (i) == '}') {
 						if (bracketCount == 1) {
 							//End of bracket
-							working += '}';
+							working.append ('}');
 							break;
 						} else {
 							bracketCount--;
 						}
 					}
-					working += noWhitespace.charAt (i);
+					working.append (noWhitespace.charAt (i));
 					i++;
 					if (i >= noWhitespace.length ()) {
 						throw new JSONException ("Missing } when parsing token " + value);
 					}
 				}
-				values.put (key, new JSONObject (working));
+				values.put (key, new JSONObject (working.toString ()));
 			} else if (noWhitespace.charAt (i) == '[') {
 				//Value is a JSONArray
-				working = "[";
+				working = new StringBuilder ();
+				working.append ("[");
 				i++;
 				int bracketCount = 1;
 				while (true) {
@@ -87,26 +92,26 @@ public class JSONObject {
 					} else if (noWhitespace.charAt (i) == ']') {
 						if (bracketCount == 1) {
 							//End of bracket
-							working += ']';
+							working.append ("]");
 							break;
 						} else {
 							bracketCount--;
 						}
 					}
-					working += noWhitespace.charAt (i);
+					working.append (noWhitespace.charAt (i));
 					i++;
 					if (i >= noWhitespace.length ()) {
 						throw new JSONException ("Missing ] when parsing token " + value);
 					}
 				}
-				values.put (key, new JSONArray (working));
+				values.put (key, new JSONArray (working.toString ()));
 			} else {
 				//Value is a JSON literal
-				working = "";
+				working = new StringBuilder ();
 				while (i < noWhitespace.length () && noWhitespace.charAt (i) != ',') {
-					working += noWhitespace.charAt (i++);
+					working.append (noWhitespace.charAt (i++));
 				}
-				values.put (key, JSONUtil.getValueOfJSONLiteral (working));
+				values.put (key, JSONUtil.getValueOfJSONLiteral (working.toString ()));
 			}
 			i++;
 			if (i < noWhitespace.length () && noWhitespace.charAt (i) == ',') {

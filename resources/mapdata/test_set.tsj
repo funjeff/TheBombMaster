@@ -1,5 +1,5 @@
 { "columns":10,
- "image":"..\/..\/git\/TheBombMaster\/resources\/tilesets\/overworldset.png",
+ "image":"overworldset.png",
  "imageheight":64,
  "imagewidth":160,
  "margin":0,

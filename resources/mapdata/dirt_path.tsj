@@ -1,5 +1,5 @@
 { "columns":1,
- "image":"..\/..\/git\/TheBombMaster\/resources\/tilesets\/dirt_path.png",
+ "image":"dirt_path.png",
  "imageheight":32,
  "imagewidth":32,
  "margin":0,

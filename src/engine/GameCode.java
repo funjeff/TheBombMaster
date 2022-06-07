@@ -2,7 +2,6 @@ package engine;
 
 import gameObjects.BombMaster;
 import map.Room;
-import map.Room2;
 
 
 public class GameCode {
@@ -27,7 +26,7 @@ public class GameCode {
 	public static void init () {
 		
 		//Test
-		Room.loadRoom ("big_test.tmj");
+		Room.loadRoom ("resources/mapdata/master_bomber_worldmap.tmj");
 		
 		BombMaster mast = new BombMaster ();
 		mast.declare();
