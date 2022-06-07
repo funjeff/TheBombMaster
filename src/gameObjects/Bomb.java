@@ -1,82 +1,161 @@
 package gameObjects;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 import engine.GameObject;
 import engine.Sprite;
 
 public class Bomb extends GameObject {
 
 	
-	public static final Sprite FULL_FUSE = new Sprite ("resources/sprites/bomb full fuse.png");
-	public static final Sprite HALF_FUSE = new Sprite ("resources/sprites/bomb partialy lit.png");
-	public static final Sprite NO_FUSE = new Sprite ("resources/sprites/bomb no fuse.png");
+	public Sprite fullFuse = new Sprite ("resources/sprites/bombs/bomb full fuse.png");
+	public Sprite halfFuse = new Sprite ("resources/sprites/bombs/bomb half fuse.png");
+	public Sprite noFuse = new Sprite ("resources/sprites/bombs/bomb no fuse.png");
 	
-	public static final Sprite FULL_FUSE_RED = new Sprite ("resources/sprites/bomb full fuse red.png");
-	public static final Sprite HALF_FUSE_RED = new Sprite ("resources/sprites/bomb partialy lit red.png");
-	public static final Sprite NO_FUSE_RED = new Sprite ("resources/sprites/bomb no fuse red.png");
+	public Sprite fullFuseRed = new Sprite ("resources/sprites/bombs/bomb full fuse red.png");
+	public Sprite halfFuseRed = new Sprite ("resources/sprites/bombs/bomb half fuse red.png");
+	public Sprite noFuseRed = new Sprite ("resources/sprites/bombs/bomb no fuse red.png");
 	
 	
 	int fuseThird;
 	
-	int bombTimer = 120;
+	int bombTimer = 40;
+	int fullTimer = 40;
 	
-	double direction;
+	int tempImunity = 0;
 	
-	double speed = 0;
 	
-	public Bomb () {
-		this.setSprite(FULL_FUSE);
+	
+	ArrayList <GameObject> owners = new ArrayList <GameObject>();
+	
+	double bombSize;
+	
+	int minFrags = 3;
+	int maxFrags = 10;
+	
+	public Bomb (GameObject owner) {
+		this.setSprite(fullFuse);
+		
+		this.setHitboxAttributes(32,32);
+		this.owners.add(owner);
+		bombSize = 2.5;
+	}
+	
+	public Bomb (GameObject owner, double explosionSize) {
+		this.setSprite(fullFuse);
+		
+		this.setHitboxAttributes(32,32);
+		this.owners.add(owner);
+		bombSize = explosionSize;
+	}
+	
+	public Bomb (ArrayList <GameObject> owners, double explosionSize) {
+		this.setSprite(fullFuse);
+		
+		this.setHitboxAttributes(32,32);
+		this.owners = owners;
+		bombSize = explosionSize;
 	}
 	
 	@Override
 	public void frameEvent() {
 		bombTimer = bombTimer - 1;
 		
-		if (bombTimer == 80) {
+		if (tempImunity != 0) {
+			tempImunity = tempImunity -1;
+		}
+		
+		if (bombTimer == fullTimer * 2/3) {
 			fuseThird = 1;
 		}
 		
-		if (bombTimer == 40) {
+		if (bombTimer == fullTimer * 1/3) {
 			fuseThird = 2;
 		}
 		
-		if (bombTimer == 0) {
-			this.forget(); //TODO explosion
+		if (bombTimer == 0 || (this.isCollidingChildren("GameObject") && !owners.contains(this.getCollisionInfo().getCollidingObjects().get(0)) && tempImunity == 0)) {
+		
+//			System.out.println(this.getCollisionInfo().getCollidingObjects().get(0));
+//			System.out.println(owners);
+			
+			Explosion boom = new Explosion(bombSize);
+			boom.declare(this.getX() + this.hitbox().width/2 - boom.getSprite().getWidth()/2,this.getY() + this.hitbox().height/2 - boom.getSprite().getHeight()/2);
+			
+			breakToFragments("bomb fragment",minFrags,maxFrags);
+			this.forget();
 		}
 		
 		if (fuseThird == 0) {
 			if (bombTimer % 5 == 0) {
-				this.setSprite(FULL_FUSE_RED);
+				this.setSprite(fullFuseRed);
 			} else {
-				this.setSprite(FULL_FUSE);
+				this.setSprite(fullFuse);
 			}
 		}
 		
 		if (fuseThird == 1) {
 			if (bombTimer % 3 == 0) {
-				this.setSprite(HALF_FUSE_RED);
+				this.setSprite(halfFuseRed);
 			} else {
-				this.setSprite(HALF_FUSE);
+				this.setSprite(halfFuse);
 			}
 		}
 		
 		if (fuseThird == 2) {
 			if (bombTimer % 2 == 0) {
-				this.setSprite(NO_FUSE_RED);
+				this.setSprite(noFuseRed);
 			} else {
-				this.setSprite(NO_FUSE);
+				this.setSprite(noFuse);
 			}
 		}
 	
-		this.setX(this.getX() + (Math.cos(direction)*speed));
-		this.setY(this.getY() - (Math.sin(direction)*speed));
+		super.frameEvent();
 		
 	}
 	
-	
-	public void throwBomb (double direction, double speed) {
-		this.direction = direction;
-		this.speed = speed;
+	public void setOwners (ArrayList <GameObject> owners) {
+		this.owners = owners;
 	}
 	
+	public void setBombSprites(String type) {
+		fullFuse = new Sprite ("resources/sprites/bombs/" + type + " bomb full fuse.png");
+		halfFuse = new Sprite ("resources/sprites/bombs/" + type + " bomb half fuse.png");
+		noFuse = new Sprite ("resources/sprites/bombs/" + type + " bomb no fuse.png");
+		
+		fullFuseRed = new Sprite ("resources/sprites/bombs/" + type + " bomb full fuse red.png");
+		halfFuseRed = new Sprite ("resources/sprites/bombs/" + type + " bomb half fuse red.png");
+		noFuseRed = new Sprite ("resources/sprites/bombs/" + type + " bomb no fuse red.png");
+	
+		this.setSprite(fullFuse);
+		this.setHitboxAttributes(this.getSprite().getWidth(), this.getSprite().getHeight());
+		
+	}
+	
+	public void setFrags (int minFrags, int maxFrags) {
+		this.minFrags = minFrags;
+		this.maxFrags = maxFrags;
+	}
+	
+	
+	@Override
+	public void gettingSploded() {
+		if (tempImunity == 0) {
+			Explosion boom = new Explosion(bombSize);
+			boom.declare(this.getX(),this.getY());
+		
+			breakToFragments("bomb fragment",minFrags,maxFrags);
+			this.forget();
+		}
+	}
+	
+	public void giveTemparayImunity(int time) {
+		tempImunity = time;
+	}
+	
+	public void setTime (int bombTime) {
+		this.bombTimer = bombTime;
+		this.fullTimer = bombTime;
+	}
 	
 }

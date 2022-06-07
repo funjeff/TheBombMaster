@@ -1,0 +1,3 @@
+$src resources/sprites/enemies/cactus guy.png
+rectangle 1460 0 438 166:
+	grid 146 166;

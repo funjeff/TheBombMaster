@@ -1,0 +1,3 @@
+$src resources/sprites/explosion.png
+
+ rectangle 27 0 27 26
