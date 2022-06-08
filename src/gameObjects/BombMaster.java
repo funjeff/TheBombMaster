@@ -7,6 +7,7 @@ import engine.ObjectHandler;
 import engine.Sprite;
 
 import java.awt.event.KeyEvent;
+import java.util.Random;
 
 public class BombMaster extends GameObject {
 	
@@ -28,6 +29,10 @@ public class BombMaster extends GameObject {
 	
 	Bomb beingThrown = null;
 	
+	boolean dead = false;
+	
+	double explodeNum = 1;
+	
 	public BombMaster()
 	{
 	
@@ -40,8 +45,39 @@ public class BombMaster extends GameObject {
 	
 	@Override
 	public void frameEvent () {
-		updateSprite();
-		this.setHitboxAttributes(this.getSprite().getWidth(), this.getSprite().getHeight());
+		if (!dead) {
+			updateSprite();
+			this.setHitboxAttributes(this.getSprite().getWidth(), this.getSprite().getHeight());
+		} else {
+			
+			Random r = new Random();
+			
+			Explosion e = new Explosion (explodeNum*1 + .1);
+				
+			e.declare();
+			
+			e.setX(this.getX() + this.hitbox().width/2 - r.nextInt(e.hitbox().width/2));
+			e.setY(this.getY() + this.hitbox().width/2 - r.nextInt(e.hitbox().height/2));
+			
+			e.setRenderPriority(10);
+			
+			e.makeAsteticOnly();
+				
+			explodeNum = explodeNum + (r.nextDouble()*explodeNum/2);
+			
+			if (explodeNum >= 20) {
+				e.setX(this.getX() + this.hitbox().width/2 - e.hitbox().width/2);
+				e.setY(this.getY() + this.hitbox().width/2 - e.hitbox().height/2);
+				
+				SootPile p = new SootPile ();
+				p.setX(this.getX());
+				p.setY(this.getY());
+				
+				p.declare();
+				
+				this.forget();
+			}
+		}
 	}
 	
 	@Override
@@ -517,7 +553,9 @@ public class BombMaster extends GameObject {
 //		
 //	}
 	
-	
+	public void die () {
+		dead = true;
+	}
 
 	public class Legs extends GameObject {
 		

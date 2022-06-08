@@ -11,6 +11,8 @@ public class Explosion extends GameObject {
 	
 	ArrayList <GameObject> explodingObjects = new ArrayList <GameObject>();
 	
+	boolean asteticOnly = false;
+	
 	public Explosion () {
 		this.setHitboxAttributes(26, 27);
 		this.setSprite(new Sprite ("resources/sprites/config/explosion.txt"));
@@ -26,6 +28,7 @@ public class Explosion extends GameObject {
 	}
 	
 	
+	
 	@Override
 	public void frameEvent() {
 		
@@ -36,18 +39,23 @@ public class Explosion extends GameObject {
 		if (this.getAnimationHandler().getFrame() < curFrame || this.getAnimationHandler().getFrame() == 5) {
 			this.forget();
 		}
-		
-		this.isCollidingChildren("GameObject");
-		
-		ArrayList <GameObject> splodedObjects = this.getCollisionInfo().getCollidingObjects();
-		
-		for (int i = 0; i < splodedObjects.size();i++) {
-			if (!(explodingObjects.contains(splodedObjects.get(i)))){
-				splodedObjects.get(i).gettingSploded();
-				explodingObjects.add(splodedObjects.get(i));
+		if (!asteticOnly) {
+			this.isCollidingChildren("GameObject");
+			
+			ArrayList <GameObject> splodedObjects = this.getCollisionInfo().getCollidingObjects();
+			
+			for (int i = 0; i < splodedObjects.size();i++) {
+				if (!(explodingObjects.contains(splodedObjects.get(i)))){
+					splodedObjects.get(i).gettingSploded();
+					explodingObjects.add(splodedObjects.get(i));
+				}
 			}
 		}
 		
+	}
+	
+	public void makeAsteticOnly () {
+		asteticOnly = true;
 	}
 
 }

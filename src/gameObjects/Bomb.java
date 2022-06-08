@@ -82,6 +82,7 @@ public class Bomb extends GameObject {
 			Explosion boom = new Explosion(bombSize);
 			boom.declare(this.getX() + this.hitbox().width/2 - boom.getSprite().getWidth()/2,this.getY() + this.hitbox().height/2 - boom.getSprite().getHeight()/2);
 			
+			
 			breakToFragments("bomb fragment",minFrags,maxFrags);
 			this.forget();
 		}
@@ -144,6 +145,7 @@ public class Bomb extends GameObject {
 			Explosion boom = new Explosion(bombSize);
 			boom.declare(this.getX(),this.getY());
 		
+			
 			breakToFragments("bomb fragment",minFrags,maxFrags);
 			this.forget();
 		}
