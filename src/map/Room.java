@@ -758,7 +758,7 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 			File f = new File (tileset.getString ("image"));
 			System.out.println (f.getName ());
 			String tileId = f.getName ().split ("\\.")[0];
-			Sprite tilesImg = new Sprite ("resources/tilesets/" + f.getName ());
+			Sprite tilesImg = new Sprite ("resources/mapdata/" + f.getName ());
 			BufferedImage rawImg = tilesImg.getFrame (0);
 			int tileCount = tileset.getInt ("tilecount");
 			
@@ -785,7 +785,7 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 			TileData current = new TileData ("_NULL");
 			dataList.add(current);
 			nameList.put("_NULL", current);
-			Sprite newSprite = new Sprite ("resources/tilesets/transparent.png");
+			Sprite newSprite = new Sprite ("resources/mapdata/transparent.png");
 			BufferedImage tile = newSprite.getFrame(0);
 			tileIcons.add(tile);
 			
@@ -844,9 +844,6 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 	 * @param y the y coordinate to set the veiw too
 	 */
 	public static void setView (int x, int y) {	
-		if (x <getViewX()) {
-			System.out.println("debg");
-		}
 		updateX = x;
 		updateY = y;
 	}
@@ -1006,7 +1003,7 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 		JSONArray mapSets = mapData.getJSONArray ("tilesets");
 		for (int i = 0; i < mapSets.getContents ().size (); i++) {
 			String fname = ((JSONObject)mapSets.get (i)).getString ("source");
-			String path = "resources/tilesets/" + fname;
+			String path = "resources/mapdata/" + fname;
 			try {
 				JSONObject tsJSON = JSONUtil.loadJSONFile (path);
 				importTileset (tsJSON);
@@ -1021,7 +1018,7 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 		JSONArray mapLayers = mapData.getJSONArray ("layers");
 		numLayers = mapLayers.getContents ().size ();
 		for (int i = 0; i < mapLayers.getContents ().size (); i++) {
-			MapLayer working = new MapLayerFactory ((JSONObject)mapLayers.get (i)).newMapLayer ();
+			MapLayer working = new MapLayerFactory ((JSONObject)mapLayers.get (mapLayers.getContents ().size () - i - 1)).newMapLayer ();
 			loadLayer (working);
 		}
 	}

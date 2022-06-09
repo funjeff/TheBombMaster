@@ -3,15 +3,15 @@ package engine;
 import java.util.ArrayList;
 
 public class Asker {
-	Actor ask;
+	GameObject ask;
 	ArrayList <Integer> heldKeys;
 	
-	public Asker (Actor obj) {
+	public Asker (GameObject obj) {
 		ask = obj;
 		heldKeys = new ArrayList <Integer> ();
 	}
 	 
-	public boolean isAsker(Actor isHim) {
+	public boolean isAsker(GameObject isHim) {
 		return ask.equals(isHim);
 	}
 	

@@ -17,6 +17,7 @@ import javax.imageio.ImageIO;
 
 
 
+
 /**
  * Represents a drawable image
  * @author nathan
@@ -500,6 +501,21 @@ public class Sprite {
 
 	public void setScale(boolean doesScale) {
 		this.doesScale = doesScale;
+	}
+	
+	public static BufferedImage [] getScaledArr (Sprite toScale, int width, int height) {
+		
+		BufferedImage [] buff = new BufferedImage [toScale.getFrameCount()];
+		
+		for (int i = 0; i < toScale.getFrameCount(); i++) {
+			Image img = toScale.getFrame(i).getScaledInstance(width, height, Image.SCALE_FAST);
+			BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+			Graphics2D bGr = bimage.createGraphics();
+		    bGr.drawImage(img, 0, 0, null);
+		    
+		    buff[i] = bimage;
+		}
+		return buff;
 	}
 	
 	//lol got this from stack overflow

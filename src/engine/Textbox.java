@@ -6,9 +6,6 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.Stack;
 
-import main.GameCode;
-import main.Actor;
-import resources.Sprite;
 
 
 public class Textbox extends GameObject {
@@ -427,7 +424,7 @@ public class Textbox extends GameObject {
 		tempColor = fontName;
 		if (textSize != 16) {
 			
-			fontSheet = new Sprite (Sprite.scale(getTextboxResource ("resources/sprites/Text/" + tempColor + ".png", "grid "+ 16 + " " + 16,fontSheet.getOpacity()), textSize, textSize));
+			fontSheet = new Sprite (Sprite.getScaledArr(getTextboxResource ("resources/sprites/Text/" + tempColor + ".png", "grid "+ 16 + " " + 16,fontSheet.getOpacity()), textSize, textSize));
 			
 		}
 	}
@@ -463,7 +460,7 @@ public class Textbox extends GameObject {
 	}
 	public void setTextSize(int textSize) {	
 		
-		fontSheet = new Sprite (Sprite.scale(getTextboxResource ("resources/sprites/Text/" + tempColor + ".png", "grid "+ this.textSize + " " + this.textSize, fontSheet.getOpacity()), textSize, textSize));
+		fontSheet = new Sprite (Sprite.getScaledArr(getTextboxResource ("resources/sprites/Text/" + tempColor + ".png", "grid "+ this.textSize + " " + this.textSize, fontSheet.getOpacity()), textSize, textSize));
 		
 		
 		this.textSize = textSize;
@@ -477,8 +474,7 @@ public class Textbox extends GameObject {
 		
 		if (this.textSize != textSize) {
 
-			fontSheet = new Sprite (Sprite.scale(getTextboxResource ("resources/sprites/Text/" + tempColor + ".png", "grid "+ this.textSize + " " + this.textSize, fontSheet.getOpacity()), textSize, textSize));
-			
+			fontSheet = new Sprite (Sprite.getScaledArr(getTextboxResource ("resources/sprites/Text/" + tempColor + ".png", "grid "+ this.textSize + " " + this.textSize, fontSheet.getOpacity()), textSize, textSize));
 			
 			this.textSize = textSize;
 		}
@@ -566,9 +562,9 @@ public class Textbox extends GameObject {
 	//EDIT I FINALLY FUCKIN REWROTE IT AFTER 5 FUCKING YEARS geez I can't belive ive been doing this for so long
 public void drawBox () {
 	if (scrollPaused <= 0) {
-		if ((System.currentTimeMillis() > curTime + scrollSpeed || (System.currentTimeMillis() > curTime + (scrollSpeed/2) && GameCode.keyCheck('X'))) && scrollSpeed != 0) {
+		if ((System.currentTimeMillis() > curTime + scrollSpeed || (System.currentTimeMillis() > curTime + (scrollSpeed/2) && GameCode.keyCheck('X',this))) && scrollSpeed != 0) {
 			long diffrence = System.currentTimeMillis() - curTime;
-			if (!GameCode.keyDown('X')) {
+			if (!GameCode.keyCheck('X',this)) {
 				amountScrolled = amountScrolled + (int)(diffrence/scrollSpeed);
 			} else {
 				amountScrolled = amountScrolled + (int)(diffrence/(scrollSpeed/2));
@@ -581,10 +577,10 @@ public void drawBox () {
 			scrollPaused = 0;
 		}
 	}
-	if (GameCode.keyCheck('C')) {
+	if (GameCode.keyCheck('C',this)) {
 		amountScrolled = text.length();
 	}
-	if (GameCode.keyPressed(KeyEvent.VK_ENTER) && (amountScrolled >= getFakePos(text.length() - 1) || scrollSpeed == 0)) {
+	if (GameCode.keyPressed(KeyEvent.VK_ENTER,this) && (amountScrolled >= getFakePos(text.length() - 1) || scrollSpeed == 0)) {
 		advanceText();	
 	}
 	
@@ -609,45 +605,45 @@ public void drawBox () {
 		//draw the inside of the box tile by tile
 		for (int i = 0; i < width/8; i++) {
 			for (int j = 1; j < height/8; j++) {
-				textBoxBackground.draw((int)((this.getX() - GameCode.getVeiwX()) + (i * 8)),(int) ( (this.getY() - GameCode.getVeiwY()) + (j * 8) -10));
+				textBoxBackground.draw((int)((this.getX() - GameCode.getViewX()) + (i * 8)),(int) ( (this.getY() - GameCode.getViewY()) + (j * 8) -10));
 			}
 		}
 		//deal with drawing the inside of the box when the width not a multple of 8
 		if (width%8 != 0) {
 			for (int j = 1; j < height/8; j++) {
-				textBoxBackground.draw((int)((this.getX() - GameCode.getVeiwX()) + (this.width - (8 - (this.width%8)))),(int) ( (this.getY() - GameCode.getVeiwY()) + (j * 8) -10));
+				textBoxBackground.draw((int)((this.getX() - GameCode.getViewX()) + (this.width - (8 - (this.width%8)))),(int) ( (this.getY() - GameCode.getViewY()) + (j * 8) -10));
 			}	
 		}
 		
 		//deal with drawing the inside of the box when the height is not a multiple of 8
 		if (height%8 != 0) {
 			for (int j = 1; j < width/8; j++) {
-				textBoxBackground.draw((int)((this.getX() - GameCode.getVeiwX()) + (j * 8)),(int) ( (this.getY() - GameCode.getVeiwY()) + (this.height - (8 - (this.height%8))) -10));
+				textBoxBackground.draw((int)((this.getX() - GameCode.getViewX()) + (j * 8)),(int) ( (this.getY() - GameCode.getViewY()) + (this.height - (8 - (this.height%8))) -10));
 			}
 		}
 		
 		//draw the borders on the top and bottom
 		for (int i = 0; i < width/8; i++) {
-			textBoxTop.draw((int)((this.getX() - GameCode.getVeiwX()) + (i*8)), (int)((this.getY() - GameCode.getVeiwY()) -10));
-			textBoxBottum.draw((int)((this.getX() - GameCode.getVeiwX()) + (i*8)), (int)((this.getY() - GameCode.getVeiwY()) + (height) -10));
+			textBoxTop.draw((int)((this.getX() - GameCode.getViewX()) + (i*8)), (int)((this.getY() - GameCode.getViewY()) -10));
+			textBoxBottum.draw((int)((this.getX() - GameCode.getViewX()) + (i*8)), (int)((this.getY() - GameCode.getViewY()) + (height) -10));
 		}
 		
 		//deal with drawing the borders on the top and bottom when the box is not a multiple of 8 for size
 		if (width%8 != 0) {
-			textBoxTop.draw((int)((this.getX() - GameCode.getVeiwX()) + (this.width - (8 - (this.width%8)))), (int)((this.getY() - GameCode.getVeiwY()) -10));
-			textBoxBottum.draw((int)((this.getX() - GameCode.getVeiwX()) + (this.width - (8 - (this.width%8)))), (int)((this.getY() - GameCode.getVeiwY()) + (height) -10));
+			textBoxTop.draw((int)((this.getX() - GameCode.getViewX()) + (this.width - (8 - (this.width%8)))), (int)((this.getY() - GameCode.getViewY()) -10));
+			textBoxBottum.draw((int)((this.getX() - GameCode.getViewX()) + (this.width - (8 - (this.width%8)))), (int)((this.getY() - GameCode.getViewY()) + (height) -10));
 		}
 		
 		//draw the borders on the side
 		for (int i = 1; i < height/8; i++) {
-			textBoxSides.draw((int)((this.getX() - GameCode.getVeiwX())), (int)((this.getY() - GameCode.getVeiwY())+ (i*8) -10));
-			textBoxSides.draw((int)((this.getX() - GameCode.getVeiwX()) +(width)), (int)((this.getY()  - GameCode.getVeiwY())+ (i*8) -10));
+			textBoxSides.draw((int)((this.getX() - GameCode.getViewX())), (int)((this.getY() - GameCode.getViewY())+ (i*8) -10));
+			textBoxSides.draw((int)((this.getX() - GameCode.getViewX()) +(width)), (int)((this.getY()  - GameCode.getViewY())+ (i*8) -10));
 		}
 		//deal with drawing the borders on the sides when the box is not a multiple of 8 high
 		
 		if (height %8 != 0) {
-			textBoxSides.draw((int)((this.getX() - GameCode.getVeiwX())), (int)((this.getY() - GameCode.getVeiwY())+ (this.height - (8 - (this.height%8))) -10));
-			textBoxSides.draw((int)((this.getX() - GameCode.getVeiwX()) +(width)), (int)((this.getY()  - GameCode.getVeiwY())+ (this.height - (8 - (this.height%8))) -10));
+			textBoxSides.draw((int)((this.getX() - GameCode.getViewX())), (int)((this.getY() - GameCode.getViewY())+ (this.height - (8 - (this.height%8))) -10));
+			textBoxSides.draw((int)((this.getX() - GameCode.getViewX()) +(width)), (int)((this.getY()  - GameCode.getViewY())+ (this.height - (8 - (this.height%8))) -10));
 		}
 		
 	}
@@ -824,9 +820,9 @@ public void drawBox () {
 			}
 		}	
 		
-		if (xPos > GameCode.getVeiwX() && xPos < GameCode.getVeiwX() + GameCode.getResolutionX() && yPos > GameCode.getVeiwY() && yPos < GameCode.getVeiwY() + GameCode.getResolutionY()) {
+		if (xPos > GameCode.getViewX() && xPos < GameCode.getViewX() + GameCode.getResolutionX() && yPos > GameCode.getViewY() && yPos < GameCode.getViewY() + GameCode.getResolutionY()) {
 		
-			fontSheet.draw(xPos + (int)shakeOffsetX - GameCode.getVeiwX (), yPos + (int)shakeOffsetY - GameCode.getVeiwY (), text.charAt(i));
+			fontSheet.draw(xPos + (int)shakeOffsetX - GameCode.getViewX (), yPos + (int)shakeOffsetY - GameCode.getViewY (), text.charAt(i));
 			if (textSize > largestSize) {
 				largestSize = textSize;
 			}
@@ -1140,7 +1136,7 @@ private int dealWithTilde (String message, int startI) {
 public void draw () {
 		Rectangle thisRect = new Rectangle ((int)this.getX(), (int)this.getY(), this.width, this.height);
 	
-		Rectangle veiwport = new Rectangle ((int) GameCode.getVeiwX(), (int) GameCode.getVeiwY(), GameCode.getResolutionX (), GameCode.getResolutionY ());
+		Rectangle veiwport = new Rectangle ((int) GameCode.getViewX(), (int) GameCode.getViewY(), GameCode.getResolutionX (), GameCode.getResolutionY ());
 		if (thisRect.intersects(veiwport)) {
 			this.drawBox();
 		}
@@ -1178,7 +1174,7 @@ public class QueryWindow extends Textbox {
 				choiceText = choiceText + newChoices[i];
 			}
 		}
-		ogY = this.getY();
+		ogY = (int)this.getY();
 		this.changeText(choiceText);
 		this.lineSpacing = 1.25;
 		this.setDimentions();
@@ -1213,23 +1209,23 @@ public class QueryWindow extends Textbox {
 				
 				super.drawBox();
 				
-				if (GameCode.keyPressed('S')) {
+				if (GameCode.keyPressed('S',this)) {
 					if (hovered < choices.length -1) {
 						hovered = hovered + 1;
 					}
 				}
 				
-				if (GameCode.keyPressed('W')) {
+				if (GameCode.keyPressed('W',this)) {
 					if (hovered > 0) {
 						hovered = hovered -1;
 					}
 				}
 				
-				selector.draw(this.getX() -10, this.getY() + ((int)(textSize*lineSpacing) *hovered));
+				selector.draw((int)(this.getX() -10), (int)this.getY() + ((int)(textSize*lineSpacing) *hovered));
 				
 				
 				
-				if (GameCode.keyCheck(KeyEvent.VK_ENTER)) {
+				if (GameCode.keyCheck(KeyEvent.VK_ENTER,this)) {
 					if (!enterDown) {
 						result = hovered;
 					}

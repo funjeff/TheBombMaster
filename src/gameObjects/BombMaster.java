@@ -5,6 +5,7 @@ import javax.swing.plaf.basic.BasicComboBoxUI.KeyHandler;
 import engine.GameObject;
 import engine.ObjectHandler;
 import engine.Sprite;
+import map.Room;
 
 import java.awt.event.KeyEvent;
 import java.util.Random;
@@ -45,9 +46,24 @@ public class BombMaster extends GameObject {
 	
 	@Override
 	public void frameEvent () {
+
 		if (!dead) {
 			updateSprite();
 			this.setHitboxAttributes(this.getSprite().getWidth(), this.getSprite().getHeight());
+		
+			if (getX () - Room.getViewXAcurate () > 700) {
+				Room.setView ((int)getX () - 700, Room.getViewYAcurate ());
+			}
+			if (getY () - Room.getViewYAcurate () > 400) {
+				Room.setView (Room.getViewXAcurate (), (int)getY () - 400);
+			}
+			if (getX () - Room.getViewXAcurate () < 200) {
+				Room.setView ((int)getX () - 200, Room.getViewYAcurate ());
+			}
+			if (getY () - Room.getViewYAcurate () < 100) {
+				Room.setView (Room.getViewXAcurate (), (int)getY () - 100);
+			}
+		
 		} else {
 			
 			Random r = new Random();
@@ -78,6 +94,7 @@ public class BombMaster extends GameObject {
 				this.forget();
 			}
 		}
+
 	}
 	
 	@Override

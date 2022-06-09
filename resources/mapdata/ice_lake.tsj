@@ -1,5 +1,5 @@
 { "columns":8,
- "image":"..\/..\/git\/TheBombMaster\/resources\/tilesets\/ice_lake.png",
+ "image":"ice_lake.png",
  "imageheight":192,
  "imagewidth":256,
  "margin":0,

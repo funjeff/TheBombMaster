@@ -20,8 +20,9 @@ public class GameCode {
 	
 	static BombMaster mast;
 
-	 static ArrayList <Asker> askers = new ArrayList <Asker> ();
+	static ArrayList <Asker> askers = new ArrayList <Asker> ();
 	
+//	static Textbox t = new Textbox ("~S8~~P100~TESTY BOIIIIIIIIIIIIIS");
 
 	public static void testBitch () {
 		
@@ -39,7 +40,7 @@ public class GameCode {
 	public static void init () {
 		
 		//Test
-		//Room.loadRoom ("big_test.tmj");
+		Room.loadRoom ("resources/mapdata/master_bomber_worldmap.tmj");
 		
 		mast = new BombMaster ();
 		mast.declare();
@@ -47,6 +48,11 @@ public class GameCode {
 
 		Hud hud = new Hud();
 		hud.declare();
+		
+		//t.setBox("Automobiles");
+      //  t.pushString("EPIC STRING DUDE");
+      //  t.pushString("~QCHOICE 1:CHOICE 2");
+      //  t.declare(200, 200);
 		
 	//	Bat b = new Bat();
 	//	b.declare(300,200);
@@ -98,7 +104,7 @@ public class GameCode {
 		
 		 for (int i = 0; i < askers.size(); i++) {
 		    	for (int j = 0; j < askers.get(i).getKeys().size(); j++) {
-		    		if (!GameLoop.getInputImage().keyDown(askers.get(i).heldKeys.get(i))) {
+		    		if (!GameLoop.getInputImage().keyDown(askers.get(i).heldKeys.get(j))) {
 		    			askers.get(i).getKeys().remove(j);
 		    			j--;
 		    		}
@@ -181,6 +187,12 @@ public class GameCode {
 		
 	}
 		
+	public static int getResolutionX() {
+		return RenderLoop.wind.getResolution()[0];
+	}
+	public static int getResolutionY() {
+		return RenderLoop.wind.getResolution()[1];
+	}
 	
 	public static int getViewX() {
 		return veiwX;

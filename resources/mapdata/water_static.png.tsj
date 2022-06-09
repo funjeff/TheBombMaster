@@ -1,5 +1,5 @@
 { "columns":1,
- "image":"..\/..\/git\/TheBombMaster\/resources\/tilesets\/water_static.png",
+ "image":"water_static.png",
  "imageheight":32,
  "imagewidth":32,
  "margin":0,
