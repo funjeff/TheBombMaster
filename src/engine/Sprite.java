@@ -17,6 +17,7 @@ import javax.imageio.ImageIO;
 
 
 
+
 /**
  * Represents a drawable image
  * @author nathan
@@ -47,6 +48,8 @@ public class Sprite {
 	 * does this get scalled by the changes of resolution
 	 */
 	protected boolean doesScale = true;
+	
+	private float opacity = 1;
 	
 	/**
 	 * 
@@ -120,7 +123,6 @@ public class Sprite {
 		File imageFile = new File (imagepath);
 		BufferedImage img = null;
 		try {
-			System.out.println(imagepath);
 			img = ImageIO.read (imageFile);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -501,15 +503,88 @@ public class Sprite {
 		this.doesScale = doesScale;
 	}
 	
-	//lol got this from stack overflow
-	public void setOpacity (float opacity, int frame) {
-		BufferedImage newImg = new BufferedImage (this.getFrame(frame).getWidth(), this.getFrame(frame).getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
-		Graphics2D g = (Graphics2D) newImg.getGraphics();
-		AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER,(float) opacity);
-		g.setComposite(ac);
-		g.drawImage(this.getFrame(frame), 0, 0, newImg.getWidth(), newImg.getHeight(), null);
-		this.setFrame(frame, newImg);
+	public static BufferedImage [] getScaledArr (Sprite toScale, int width, int height) {
+		
+		BufferedImage [] buff = new BufferedImage [toScale.getFrameCount()];
+		
+		for (int i = 0; i < toScale.getFrameCount(); i++) {
+			Image img = toScale.getFrame(i).getScaledInstance(width, height, Image.SCALE_FAST);
+			BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+			Graphics2D bGr = bimage.createGraphics();
+		    bGr.drawImage(img, 0, 0, null);
+		    
+		    buff[i] = bimage;
+		}
+		return buff;
 	}
+	
+	//lol got this from stack overflow
+		public void setOpacity (float opacity, int frame) {
+			
+			String key = this.getImagePath();
+			
+			if (this.getParsePath() != null) {
+				key = key + ":" + this.getParsePath();
+			}
+			
+			this.images = cache.get(key).data;	
+			
+			BufferedImage [] arrCopy = new BufferedImage [this.images.length];
+			
+			for (int i = 0; i < arrCopy.length; i++) {
+				arrCopy[i] = new BufferedImage (this.getFrame(i).getWidth(), this.getFrame(i).getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+				Graphics2D g = (Graphics2D) arrCopy[i].getGraphics();
+				g.drawImage(this.getFrame(i), 0, 0, arrCopy[i].getWidth(), arrCopy[i].getHeight(), null);
+			}
+			
+			cache.put(key, new CacheNode (key,arrCopy));
+			
+			BufferedImage newImg = new BufferedImage (this.getFrame(frame).getWidth(), this.getFrame(frame).getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+			Graphics2D g = (Graphics2D) newImg.getGraphics();
+			AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER,(float) opacity);
+			g.setComposite(ac);
+			g.drawImage(this.getFrame(frame), 0, 0, newImg.getWidth(), newImg.getHeight(), null);
+			this.setFrame(frame, newImg);
+			this.opacity = opacity;
+			
+			
+		}
+		
+		public void setOpacity (float opacity) {
+			
+			String key = this.getImagePath();
+			
+			if (this.getParsePath() != null) {
+				key = key + ":" + this.getParsePath();
+			}
+			
+			this.images = cache.get(key).data;
+			
+			BufferedImage [] arrCopy = new BufferedImage [this.images.length];
+			
+			for (int i = 0; i < arrCopy.length; i++) {
+				arrCopy[i] = new BufferedImage (this.getFrame(i).getWidth(), this.getFrame(i).getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+				Graphics2D g = (Graphics2D) arrCopy[i].getGraphics();
+				g.drawImage(this.getFrame(i), 0, 0, arrCopy[i].getWidth(), arrCopy[i].getHeight(), null);
+			}
+			
+			cache.put(key, new CacheNode (key,arrCopy));
+			
+			for (int i = 0; i < this.getFrameCount(); i++) {
+				BufferedImage newImg = new BufferedImage (this.getFrame(i).getWidth(), this.getFrame(i).getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+				Graphics2D g = (Graphics2D) newImg.getGraphics();
+				AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER,opacity);
+				g.setComposite(ac);
+				g.drawImage(this.getFrame(i), 0, 0, newImg.getWidth(), newImg.getHeight(), null);
+				this.setFrame(i, newImg);
+				this.opacity = opacity;
+			}
+			
+		}
+		
+		public float getOpacity () {
+			return opacity;
+		}
 	
 	private static class CacheNode {
 		

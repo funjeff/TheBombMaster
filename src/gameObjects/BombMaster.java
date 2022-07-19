@@ -8,6 +8,7 @@ import engine.Sprite;
 import map.Room;
 
 import java.awt.event.KeyEvent;
+import java.util.Random;
 
 public class BombMaster extends GameObject {
 	
@@ -29,6 +30,10 @@ public class BombMaster extends GameObject {
 	
 	Bomb beingThrown = null;
 	
+	boolean dead = false;
+	
+	double explodeNum = 1;
+	
 	public BombMaster()
 	{
 	
@@ -41,20 +46,55 @@ public class BombMaster extends GameObject {
 	
 	@Override
 	public void frameEvent () {
-		updateSprite();
-		if (getX () - Room.getViewXAcurate () > 700) {
-			Room.setView ((int)getX () - 700, Room.getViewYAcurate ());
+
+		if (!dead) {
+			updateSprite();
+			this.setHitboxAttributes(this.getSprite().getWidth(), this.getSprite().getHeight());
+		
+			if (getX () - Room.getViewXAcurate () > 700) {
+				Room.setView ((int)getX () - 700, Room.getViewYAcurate ());
+			}
+			if (getY () - Room.getViewYAcurate () > 400) {
+				Room.setView (Room.getViewXAcurate (), (int)getY () - 400);
+			}
+			if (getX () - Room.getViewXAcurate () < 200) {
+				Room.setView ((int)getX () - 200, Room.getViewYAcurate ());
+			}
+			if (getY () - Room.getViewYAcurate () < 100) {
+				Room.setView (Room.getViewXAcurate (), (int)getY () - 100);
+			}
+		
+		} else {
+			
+			Random r = new Random();
+			
+			Explosion e = new Explosion (explodeNum*1 + .1);
+				
+			e.declare();
+			
+			e.setX(this.getX() + this.hitbox().width/2 - r.nextInt(e.hitbox().width/2));
+			e.setY(this.getY() + this.hitbox().width/2 - r.nextInt(e.hitbox().height/2));
+			
+			e.setRenderPriority(10);
+			
+			e.makeAsteticOnly();
+				
+			explodeNum = explodeNum + (r.nextDouble()*explodeNum/2);
+			
+			if (explodeNum >= 20) {
+				e.setX(this.getX() + this.hitbox().width/2 - e.hitbox().width/2);
+				e.setY(this.getY() + this.hitbox().width/2 - e.hitbox().height/2);
+				
+				SootPile p = new SootPile ();
+				p.setX(this.getX());
+				p.setY(this.getY());
+				
+				p.declare();
+				
+				this.forget();
+			}
 		}
-		if (getY () - Room.getViewYAcurate () > 400) {
-			Room.setView (Room.getViewXAcurate (), (int)getY () - 400);
-		}
-		if (getX () - Room.getViewXAcurate () < 200) {
-			Room.setView ((int)getX () - 200, Room.getViewYAcurate ());
-		}
-		if (getY () - Room.getViewYAcurate () < 100) {
-			Room.setView (Room.getViewXAcurate (), (int)getY () - 100);
-		}
-		this.setHitboxAttributes(this.getSprite().getWidth(), this.getSprite().getHeight());
+
 	}
 	
 	@Override
@@ -530,7 +570,9 @@ public class BombMaster extends GameObject {
 //		
 //	}
 	
-	
+	public void die () {
+		dead = true;
+	}
 
 	public class Legs extends GameObject {
 		

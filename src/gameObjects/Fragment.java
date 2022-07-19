@@ -49,7 +49,6 @@ public class Fragment extends GameObject {
 			speed = speed -.2;
 		}
 		
-		
 		if (activeTime == 0) {
 			despawnAllCoolLike(20);
 		} else {

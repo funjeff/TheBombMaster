@@ -2,6 +2,7 @@ package gameObjects;
 
 import java.util.ArrayList;
 
+import engine.GameCode;
 import engine.GameObject;
 import engine.Sprite;
 
@@ -59,7 +60,7 @@ public class Hud extends GameObject {
 			health = health - 1;
 		} else {
 			hearts.get(health).takeDamage();
-			//TODO game over
+			GameCode.getBombMaster().die();
 		}
 	}
 	
