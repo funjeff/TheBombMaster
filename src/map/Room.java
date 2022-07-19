@@ -6,6 +6,8 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.image.BufferedImage;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -341,6 +343,57 @@ public class Room {
 		Room.mapObjectsUsed = mapObjectsUsed;
 	}
 
+	public static boolean isCollidingWithTile (Rectangle obj, int tileX, int tileY) {
+		
+		//Get the tile icon
+		BufferedImage sampleImg = tileIcons.get (getTile (collisionLayer, tileY, tileX));
+		WritableRaster imgRaster = sampleImg.getAlphaRaster ();
+		
+		//Calculate the intersection
+		Rectangle tileRect = new Rectangle (tileX * tileWidth, tileY * tileHeight, tileWidth, tileHeight);
+		Rectangle isectRect = obj.intersection (tileRect);
+		System.out.println (obj.toString ());
+		System.out.println (tileRect.toString ());
+		System.out.println (isectRect.toString ());
+		int spriteX = isectRect.x % tileWidth;
+		int spriteY = isectRect.y % tileHeight;
+		
+//		//Randomly check 1% of the pixels in the tile
+//		int numPixelsToCheck = (isectRect.width * isectRect.height) / 100;
+//		for (int i = 0; i < numPixelsToCheck; i++) {
+//			int randX = (int)(Math.random () * isectRect.width);
+//			int randY = (int)(Math.random () * isectRect.height);
+//			int currX = randX + spriteX;
+//			int currY = randY + spriteY;
+//			//Sample here
+//			double[] sample = new double[1];
+//			imgRaster.getPixel (currX, currY, sample);
+//			if (sample[0] > 0) {
+//				return true;
+//			}
+//		}
+			
+		//Check every pixel in the intersection
+		System.out.println ("INSIDE: " + getTile (collisionLayer, tileY, tileX));
+		System.out.println (getTile (collisionLayer, tileY, tileX));
+		for (int wx = 0; wx < isectRect.width; wx++) {
+			for (int wy = 0; wy < isectRect.height; wy++) {
+				int currX = wx + spriteX;
+				int currY = wy + spriteY;
+				//Sample here
+				double[] sample = new double[1];
+				imgRaster.getPixel (currX, currY, sample);
+				if (sample[0] > 0) {
+					return true;
+				}
+			}
+		}
+		
+		//No pixels were in the intersection
+		return false;
+		
+	}
+	
 	/**
 	 * checks to see if the given object is colliding with a solid tile
 	 * @param obj the object to check
@@ -355,7 +408,7 @@ public class Room {
 			int startY = Math.max(hitbox.y/tileHeight,0);
 			int endX = Math.min((hitbox.x + hitbox.width)/tileWidth,mapWidth-1);
 			int endY = Math.min((hitbox.y + hitbox.height)/tileHeight,mapHeight-1);
-			for (int wx = startX; wx <= endX; wx++ ){
+			for (int wx = startX; wx <= endX; wx++) {
 				for (int wy = startY; wy <= endY; wy++) {
 					int index = getTile (collisionLayer, wx, wy);
 					if (mapObjects.get(toPackedLong(wx,wy)) == null || index == SPECIAL_TILE_ID) {
@@ -365,9 +418,10 @@ public class Room {
 							if (!foundCollision) {
 							foundCollision = positionToEntitiys.get(pos).doesColide(obj);
 							}
-						} else if (dataList.get(index).isSolid()) {
+						} else if (dataList.get(index).isSolid() && isCollidingWithTile (obj.hitbox (), wx, wy)) {
 							foundCollision = true;
 						}
+						System.out.println ("OUTSIDE: " + index);
 				} else {
 					try {
 					for (int b = 0; b < mapObjects.get(toPackedLong(wx,wy)).size(); b++ ) {
@@ -378,7 +432,8 @@ public class Room {
 							return true;
 						}
 					}
-					if (dataList.get(index).isSolid()) {
+					System.out.println ("OUTSIDE: " + index);
+					if (dataList.get(index).isSolid() && isCollidingWithTile (obj.hitbox (), wx, wy)) {
 						foundCollision = true;
 					}
 					} catch (NullPointerException e) {
@@ -459,7 +514,7 @@ public class Room {
 							}
 						}
 						if (index != SPECIAL_TILE_ID) {
-							if (dataList.get(index).isSolid()) {
+							if (dataList.get(index).isSolid()  && isCollidingWithTile (obj.hitbox (), wx, wy)) {
 								working.add(new MapTile (dataList.get(index),wx*tileWidth,wy*tileHeight));
 							}
 						} else {
@@ -506,7 +561,7 @@ public class Room {
 	 * @param obj the object to check against
 	 * @return all tiles inside that object
 	 */
-public static MapTile[] getAllCollidingTiles (GameObject obj) {
+	public static MapTile[] getAllCollidingTiles (GameObject obj) {
 		ArrayList<MapTile> working =new ArrayList<MapTile>();
 		for (int i = 0; i < obj.hitboxes().length; i++) {
 			Rectangle hitbox = obj.hitboxes()[i];
@@ -1020,6 +1075,9 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 		for (int i = 0; i < mapLayers.getContents ().size (); i++) {
 			MapLayer working = new MapLayerFactory ((JSONObject)mapLayers.get (mapLayers.getContents ().size () - i - 1)).newMapLayer ();
 			loadLayer (working);
+			if (working instanceof TileLayer && ((TileLayer)working).isCollisionLayer ()) {
+				collisionLayer = i;
+			}
 		}
 	}
 	
@@ -1129,10 +1187,22 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 		private String layerType;
 		
 		private int[][] tileData;
+		private boolean isCollisionLayer = false;
 		
 		public TileLayer (JSONObject layer) {
 			
 			super (layer);
+			
+			//Load custom attribute (IsCollisionLayer)
+			JSONArray properties = (JSONArray)layer.get ("properties");
+			if (properties != null) {
+				for (int i = 0; i < properties.getContents ().size (); i++) {
+					JSONObject curr = (JSONObject)properties.get (i);
+					if (curr.getString ("name").equals ("IsCollisionLayer") && curr.get ("value").equals (Boolean.TRUE)) {
+						isCollisionLayer = true;
+					}
+				}
+			}
 			
 			//Processing for tile layer
 			tileData = new int[mapHeight][mapWidth];
@@ -1143,6 +1213,10 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 				}
 			}
 			
+		}
+		
+		public boolean isCollisionLayer () {
+			return isCollisionLayer;
 		}
 		
 		@Override
@@ -1410,7 +1484,7 @@ public static MapTile[] getAllCollidingTiles (GameObject obj) {
 						renderedImages.set(l,new BufferedImage (chungusWidth*tileHeight,chungusWidth*tileHeight,BufferedImage.TYPE_4BYTE_ABGR));
 						Graphics g = renderedImages.get(l).getGraphics();
 						while (layerClassfications.get(currentLayer)>=l) {
-							if (layerData.get (currentLayer) instanceof TileLayer) {
+							if (layerData.get (currentLayer) instanceof TileLayer /*&& !((TileLayer)layerData.get (currentLayer)).isCollisionLayer ()*/) {
 							for (int wx = 0; wx < width; wx++) {
 								for (int wy = 0; wy < height; wy++) {
 									if (getTile (currentLayer, wx + x, wy + y) == SPECIAL_TILE_ID){

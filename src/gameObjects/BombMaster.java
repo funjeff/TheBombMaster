@@ -387,7 +387,7 @@ public class BombMaster extends GameObject {
 				myLegs.getAnimationHandler().setFrameTime(100);
 			}
 			
-			this.setX(this.getX() + 4);
+			this.goX(this.getX() + 4);
 		}
 		
 		//handles walking left
@@ -403,7 +403,7 @@ public class BombMaster extends GameObject {
 				myLegs.getAnimationHandler().setFrameTime(100);
 			}
 			
-			this.setX(this.getX() - 4);
+			this.goX(this.getX() - 4);
 		}
 		
 		//handles walking up
@@ -419,7 +419,7 @@ public class BombMaster extends GameObject {
 				myLegs.getAnimationHandler().setFrameTime(50);
 			}
 			
-			this.setY(this.getY() - 4);
+			this.goY(this.getY() - 4);
 		}
 		
 		
@@ -435,7 +435,7 @@ public class BombMaster extends GameObject {
 				myLegs.getAnimationHandler().setFrameTime(50);
 			}
 			
-			this.setY(this.getY() + 4);
+			this.goY(this.getY() + 4);
 		}
 		
 		//handles walking downleft
@@ -452,8 +452,8 @@ public class BombMaster extends GameObject {
 			
 			}
 			
-			this.setX(this.getX() - 4);
-			this.setY(this.getY() + 4);	
+			this.goX(this.getX() - 4);
+			this.goY(this.getY() + 4);	
 		}
 		
 		//handles walking downright
@@ -469,8 +469,8 @@ public class BombMaster extends GameObject {
 				myLegs.getAnimationHandler().setFrameTime(100);
 			}
 			
-			this.setX(this.getX() + 4);
-			this.setY(this.getY() + 4);	
+			this.goX(this.getX() + 4);
+			this.goY(this.getY() + 4);	
 		}
 		
 		//handles walking upright
@@ -485,8 +485,8 @@ public class BombMaster extends GameObject {
 					myLegs.getAnimationHandler().setFrameTime(100);
 				}
 				
-				this.setX(this.getX() + 4);
-				this.setY(this.getY() - 4);	
+				this.goX(this.getX() + 4);
+				this.goY(this.getY() - 4);	
 			}
 			
 			//handles walking upleft
@@ -502,8 +502,8 @@ public class BombMaster extends GameObject {
 					myLegs.getAnimationHandler().setFrameTime(100);
 				}
 				
-				this.setX(this.getX() - 4);
-				this.setY(this.getY() - 4);	
+				this.goX(this.getX() - 4);
+				this.goY(this.getY() - 4);	
 			}
 			
 			

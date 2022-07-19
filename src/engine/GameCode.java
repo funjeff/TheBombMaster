@@ -8,10 +8,6 @@ import gameObjects.Heart;
 import gameObjects.Hud;
 import gameObjects.MachineBomber;
 import map.Room;
-<<<<<<< HEAD
-=======
-
->>>>>>> 6fde71494f13a24d41baaa14a39f597a0c934f0b
 
 
 public class GameCode {
@@ -80,8 +76,8 @@ public class GameCode {
 	}
 	
 	public static void renderFunc () {
-		ObjectHandler.renderAll();
 		Room.render();
+		ObjectHandler.renderAll();
 	}
 	
 	public static void beforeRender() {
