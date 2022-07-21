@@ -210,8 +210,8 @@ public class GameCode {
 	
 	
 	public static void renderFunc () {
-		ObjectHandler.renderAll();
 		Room.render();
+		ObjectHandler.renderAll();
 	}
 	
 	public static void beforeRender() {
