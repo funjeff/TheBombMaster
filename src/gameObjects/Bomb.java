@@ -34,6 +34,14 @@ public class Bomb extends GameObject {
 	int minFrags = 3;
 	int maxFrags = 10;
 	
+	String explsionSprite = "default";
+	
+	String fragmentString = "bomb fragment";
+	
+	boolean asteticOnly = false;
+	
+	boolean cancelExplosion = false;
+	
 	public Bomb (GameObject owner) {
 		this.setSprite(fullFuse);
 		
@@ -74,16 +82,29 @@ public class Bomb extends GameObject {
 			fuseThird = 2;
 		}
 		
-		if (bombTimer == 0 || (this.isCollidingChildren("GameObject") && !owners.contains(this.getCollisionInfo().getCollidingObjects().get(0)) && tempImunity == 0)) {
+		if (bombTimer == 0 || (!asteticOnly && this.isCollidingChildren("GameObject") && !owners.contains(this.getCollisionInfo().getCollidingObjects().get(0)) && tempImunity == 0)) {
 		
 //			System.out.println(this.getCollisionInfo().getCollidingObjects().get(0));
 //			System.out.println(owners);
 			
 			Explosion boom = new Explosion(bombSize);
-			boom.declare(this.getX() + this.hitbox().width/2 - boom.getSprite().getWidth()/2,this.getY() + this.hitbox().height/2 - boom.getSprite().getHeight()/2);
+			
+			if (!cancelExplosion) {
+				boom.declare(this.getX() + this.hitbox().width/2 - boom.getSprite().getWidth()/2,this.getY() + this.hitbox().height/2 - boom.getSprite().getHeight()/2);
+			}
+			
+			if (!this.explsionSprite.equals("default")) {
+				boom.setSprite(new Sprite (this.explsionSprite));
+			}
+			
+			if (asteticOnly) {
+				boom.makeAsteticOnly();
+			}
+			boom.setRenderPriority(this.getRenderPriority());
+			breakToFragments(fragmentString,minFrags,maxFrags);
 			
 			
-			breakToFragments("bomb fragment",minFrags,maxFrags);
+			
 			this.forget();
 		}
 		
@@ -138,6 +159,10 @@ public class Bomb extends GameObject {
 		this.maxFrags = maxFrags;
 	}
 	
+	public void setFragsType (String fragType) {
+		this.fragmentString = fragType;
+	}
+	
 	
 	@Override
 	public void gettingSploded() {
@@ -149,6 +174,18 @@ public class Bomb extends GameObject {
 			breakToFragments("bomb fragment",minFrags,maxFrags);
 			this.forget();
 		}
+	}
+	
+	public void cancelExplosion() {
+		cancelExplosion = true;
+	}
+	
+	public void makeAsteticOnly () {
+		asteticOnly = true;
+	}
+	
+	public void setExplosionSprite (String explosionSprite) {
+		this.explsionSprite = explosionSprite;
 	}
 	
 	public void giveTemparayImunity(int time) {

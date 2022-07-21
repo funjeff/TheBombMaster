@@ -31,13 +31,15 @@ public class Explosion extends GameObject {
 	
 	@Override
 	public void frameEvent() {
-		
-		if (this.getAnimationHandler().getFrame() > curFrame) {
-			curFrame = this.getAnimationHandler().getFrame();
-		}
-		
-		if (this.getAnimationHandler().getFrame() < curFrame || this.getAnimationHandler().getFrame() == 5) {
-			this.forget();
+		if (this.getAnimationHandler().getFrameTime() != 0) {
+			if (this.getAnimationHandler().getFrame() > curFrame) {
+				curFrame = this.getAnimationHandler().getFrame();
+			}
+			
+			if (this.getAnimationHandler().getFrame() < curFrame || this.getAnimationHandler().getFrame() == this.getSprite().getFrameCount()) {
+				
+				this.forget();
+			}
 		}
 		if (!asteticOnly) {
 			this.isCollidingChildren("GameObject");

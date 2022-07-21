@@ -1,10 +1,13 @@
 package engine;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Stack;
+
+import gameObjects.LetterBomb;
 
 
 
@@ -59,15 +62,16 @@ public class Textbox extends GameObject {
 	QueryWindow query = null;
 	int queryResult = -1;
 	
-	boolean textEmptied = true;
+	boolean textEmptied = false;
 	
 	boolean queryRecentlyEnded = false;
+	
 	
 	// put filepath of fontsheet to use as the font
 	public Textbox (String textToDisplay){
 		super();
 		renderBox = true;
-		this.setFont ("white");
+		this.setFont ("normal");
 		this.setBox ("Automobiles");
 		spaceManipulation = 0;
 		text = textToDisplay;
@@ -527,6 +531,10 @@ public class Textbox extends GameObject {
 	public void advanceText() {
 	//	System.out.println(reserveMessages);
 		if (!reserveMessages.isEmpty()) {
+			if (this.font.equals("Bomb")) {
+				this.explodeOldText();
+			}
+			
 			//pop the new regular message into the box
 			//its worth noteing that there will NEVER be a query message as the next message for here because if there was it would have been poped on automatically before it makes it here
 			text = "~S" + defaultSize + "~" + reserveMessages.get(0);
@@ -547,9 +555,9 @@ public class Textbox extends GameObject {
 					reserveMessages.remove(0);
 				}
 			}
-			if (reserveMessages.isEmpty()) {
-				textEmptied = true;//informs textbox owner that its empty lets it decide what to do
-			}
+			
+		} else {
+			textEmptied = true;
 		}
 		
 	}
@@ -558,32 +566,37 @@ public class Textbox extends GameObject {
 	}
 	
 	
+	@Override
+	public void frameEvent () {
+		
+		
+		if (scrollPaused <= 0) {
+			if ((System.currentTimeMillis() > curTime + scrollSpeed || (System.currentTimeMillis() > curTime + (scrollSpeed/2) && GameCode.keyCheck('X',this))) && scrollSpeed != 0) {
+				long diffrence = System.currentTimeMillis() - curTime;
+				if (!GameCode.keyCheck('X',this)) {
+					amountScrolled = amountScrolled + (int)(diffrence/scrollSpeed);
+				} else {
+					amountScrolled = amountScrolled + (int)(diffrence/(scrollSpeed/2));
+				}
+				curTime = System.currentTimeMillis();
+			}
+		} else {
+			if (scrollPaused + curTime < System.currentTimeMillis()) {
+				curTime = curTime + scrollPaused;
+				scrollPaused = 0;
+			}
+		}
+		if (GameCode.keyCheck('C',this)) {
+			amountScrolled = text.length();
+		}
+		if (GameCode.keyPressed(KeyEvent.VK_ENTER,this) && (amountScrolled >= getFakePos(text.length() - 1) || scrollSpeed == 0)) {
+			advanceText();	
+		}
+	}
+	
 	//2017 Jeffrey appologizes for this garbage code (he would never admit it though)
 	//EDIT I FINALLY FUCKIN REWROTE IT AFTER 5 FUCKING YEARS geez I can't belive ive been doing this for so long
 public void drawBox () {
-	if (scrollPaused <= 0) {
-		if ((System.currentTimeMillis() > curTime + scrollSpeed || (System.currentTimeMillis() > curTime + (scrollSpeed/2) && GameCode.keyCheck('X',this))) && scrollSpeed != 0) {
-			long diffrence = System.currentTimeMillis() - curTime;
-			if (!GameCode.keyCheck('X',this)) {
-				amountScrolled = amountScrolled + (int)(diffrence/scrollSpeed);
-			} else {
-				amountScrolled = amountScrolled + (int)(diffrence/(scrollSpeed/2));
-			}
-			curTime = System.currentTimeMillis();
-		}
-	} else {
-		if (scrollPaused + curTime < System.currentTimeMillis()) {
-			curTime = curTime + scrollPaused;
-			scrollPaused = 0;
-		}
-	}
-	if (GameCode.keyCheck('C',this)) {
-		amountScrolled = text.length();
-	}
-	if (GameCode.keyPressed(KeyEvent.VK_ENTER,this) && (amountScrolled >= getFakePos(text.length() - 1) || scrollSpeed == 0)) {
-		advanceText();	
-	}
-	
 
 	//draws the box itself
 	if (renderBox) {
@@ -591,14 +604,11 @@ public void drawBox () {
 		if (query != null) {
 			query.drawBox();
 			if (query.getResult() != -1) {
+				
+				queryRecentlyEnded = true;
+				
 				queryResult = query.getResult();
 				query.deactivate();
-				if (!reserveMessages.isEmpty()) {
-					this.advanceText();
-				} else {
-					queryRecentlyEnded = true;
-				}
-				
 			}
 		}
 		
@@ -836,6 +846,86 @@ public void drawBox () {
 	}
 	this.resetFont();
 }
+
+public void explodeOldText()
+{
+	
+	int yPos = (int) this.getY();
+	int xPos = (int) this.getX();
+	
+	for (int i = 0; i < text.length(); i++) {
+		
+		char drawChar = text.charAt(i);
+		
+		
+		
+		if (drawChar == '~') {
+			
+			int [] data = this.simulateTildeForSpace(text, i);
+			
+			i = data[0];
+			
+			
+			while (data[1] != 0) {
+				
+				xPos = (int) this.getX();
+				yPos = yPos + (int)(largestSize * lineSpacing);
+				data[1] =data[1] - 1;
+			}
+			
+			if (i >= text.length()) {
+				break;
+			}
+			
+			
+		}
+		
+		drawChar = text.charAt(i);
+		
+		//makes it never seperate the same word on two lines
+		//int lettersLeft = 0;
+		int curPos = i;
+		
+		int wordDisplace = 0;
+		
+		int workingSize = textSize;
+		
+		while (curPos < text.length()) {
+			if (text.charAt(curPos) == ' ') {
+				break;
+			}
+			if (text.charAt(curPos) == '~') {
+				int [] tildeInfo = simulateTildeForSpace(text, curPos);
+				curPos = tildeInfo[0];
+				if (tildeInfo[1] != 0) {
+					break;
+				}
+				workingSize = tildeInfo[2];
+			} else {
+				curPos = curPos + 1;
+				wordDisplace = wordDisplace + workingSize;
+			}
+		}
+		
+		
+		int testSize = xPos + (wordDisplace);
+		
+		if ((testSize - this.getX()) > width) {
+			xPos = (int) this.getX();
+			yPos = yPos + (int)(largestSize * lineSpacing);
+			if (yPos - this.getY() > height) {
+				break;
+			}
+		}	
+		
+		LetterBomb b = new LetterBomb (drawChar);
+		b.declare(xPos,yPos);
+		b.setRenderPriority(this.getRenderPriority());
+		
+		xPos = xPos + textSize;
+		
+	}
+}
 private int simulateTilde (String message, int startI) {
 		int i = startI + 1;
 		char identifyingChar = message.charAt(i);
@@ -873,6 +963,16 @@ private int simulateTilde (String message, int startI) {
 				i = i + 1;
 				break;
 			case 'A':
+				i = i + 1;
+				identifyingChar = message.charAt(i);
+				
+				while (identifyingChar != '~') {
+					i = i + 1;
+					identifyingChar = message.charAt(i);
+				}
+				i = i + 1;
+				break;
+			case 'R':
 				i = i + 1;
 				identifyingChar = message.charAt(i);
 				
@@ -962,6 +1062,16 @@ private int [] simulateTildeForSpace (String message, int startI) {
 			}
 			i = i + 1;
 			break;
+		case 'R':
+			i = i + 1;
+			identifyingChar = message.charAt(i);
+			
+			while (identifyingChar != '~') {
+				i = i + 1;
+				identifyingChar = message.charAt(i);
+			}
+			i = i + 1;
+			break;
 		case 'P':
 			i = i + 1;
 			identifyingChar = message.charAt(i);
@@ -1011,6 +1121,7 @@ private int [] simulateTildeForSpace (String message, int startI) {
  * ~N makes a newline at the current position
  * ~A100~ pauses the scrolling for 100 MS
  * ~B puts the next part in its own box
+ * ~RClass.method.arg~ calls the "method" method in class Class with args arg the method must be 1 arg string containing no .'s you can leave it blank if you want and it will call it with a null instead 
  */
 private int dealWithTilde (String message, int startI) {
 	int i = startI;
@@ -1113,6 +1224,70 @@ private int dealWithTilde (String message, int startI) {
 			
 			break;
 			
+		case 'R':
+			int tildPos2 = i;
+			i = i + 1;
+			identifyingChar = message.charAt(i);
+			
+			String fullArgs = "";
+			while (identifyingChar != '~') {
+				fullArgs = fullArgs + identifyingChar;
+				i = i + 1;
+				identifyingChar = message.charAt(i);
+			} //pulls the info for the pause message
+		
+			i = i + 1;
+			
+			String [] indivdualArgs = fullArgs.split(".");
+			
+		try {
+			Class <?> methClass = Class.forName(indivdualArgs[0]);
+			
+			String arg = null;
+			
+			try {
+				arg = indivdualArgs[2];
+			} catch (ArrayIndexOutOfBoundsException e2) {
+				
+			}
+			
+			try {
+				methClass.getMethod(indivdualArgs[1],String.class).invoke(null,arg);
+			} catch (NoSuchMethodException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		} catch (ClassNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+			
+			//removes the pause message from the string so it can't be read again
+		
+			// I LOVE JANK
+			// basically I don't know how to fix this "first letter appearing bug" so im just gonna always have the first letter be a space
+		
+			message = message.substring(0,tildPos2 -1) + message.substring(i);
+			
+			this.changeText(message);
+
+			i = tildPos2 - 2;
+		
+			break;
+			
 		case 'H':
 			changeTextShake = changeTextShake + 1;
 			i = i +1;
@@ -1179,7 +1354,8 @@ public class QueryWindow extends Textbox {
 		this.lineSpacing = 1.25;
 		this.setDimentions();
 		this.height = this.height + 8;
-		this.setBox("Automobiles");
+		this.setBox("Black");
+		this.setFont("normal");
 	}
 	
 	public void deactivate () {

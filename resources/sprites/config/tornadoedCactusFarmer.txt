@@ -1,0 +1,3 @@
+$src resources/sprites/tornadoedCactusFarmer.png
+
+ grid 41 49

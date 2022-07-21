@@ -2,6 +2,7 @@ package gameObjects;
 
 import javax.swing.plaf.basic.BasicComboBoxUI.KeyHandler;
 
+import engine.GameCode;
 import engine.GameObject;
 import engine.ObjectHandler;
 import engine.Sprite;
@@ -34,9 +35,15 @@ public class BombMaster extends GameObject {
 	
 	double explodeNum = 1;
 	
+	boolean frozen = false;
+	
+	boolean throwStuned = false;
+	
+	static Objectives objectives = new Objectives ();
+	
 	public BombMaster()
 	{
-	
+		this.setRenderPriority(2);
 		this.setSprite(FORWARD);
 		myLegs.setSprite(FORWARD_LEGS_WALK);
 		
@@ -46,9 +53,15 @@ public class BombMaster extends GameObject {
 	
 	@Override
 	public void frameEvent () {
+		
+		if (this.isCollidingChildren("NPC") && GameCode.keyPressed(KeyEvent.VK_ENTER, this) &&!frozen) {
+			((NPC)this.getCollisionInfo().getCollidingObjects().get(0)).onTalk();
+		}
 
 		if (!dead) {
-			updateSprite();
+			if (!frozen) {
+				updateSprite();
+			}
 			this.setHitboxAttributes(this.getSprite().getWidth(), this.getSprite().getHeight());
 		
 			if (getX () - Room.getViewXAcurate () > 700) {
@@ -397,8 +410,12 @@ public class BombMaster extends GameObject {
 		}
 		
 		
-		if (keyDown(KeyEvent.VK_ENTER)) {
+		if (keyDown(KeyEvent.VK_ENTER) && !throwStuned) {
 			throwingBomb = true;
+		}
+		
+		if (throwStuned && !keyDown(KeyEvent.VK_ENTER)) {
+			throwStuned = false;
 		}
 		
 		
@@ -415,7 +432,7 @@ public class BombMaster extends GameObject {
 		
 		
 		//handles walking right
-		if (keyDown('D') && !keyDown('W') && !keyDown('S')) {
+  		if (keyDown('D') && !keyDown('W') && !keyDown('S')) {
 			
 			if (!throwingBomb) {
 				this.setSprite(SIDE);
@@ -574,6 +591,15 @@ public class BombMaster extends GameObject {
 		dead = true;
 	}
 
+	public void freeze() {
+		frozen = true;
+	}
+	
+	public void unfreeze() {
+		frozen = false;
+		throwStuned = true;
+	}
+	
 	public class Legs extends GameObject {
 		
 		public Legs() {

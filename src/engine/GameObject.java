@@ -152,6 +152,8 @@ public abstract class GameObject extends GameAPI {
 	
 	private int lookingMode = 1;
 	
+	boolean collsionsEnabled = true;
+	
 	/**
 	 * Container and utility class for GameObject variants
 	 * @author nathan
@@ -431,6 +433,15 @@ public abstract class GameObject extends GameAPI {
 	protected void disablePixelCollisions () {
 		pixelCollisions = false;
 	}
+	
+	public void disableCollisions () {
+		collsionsEnabled = false;
+	}
+	
+	public void enableCollisions () {
+		collsionsEnabled = true;
+	}
+	
 	/**
 	 * Draws this GameObject at its x and y coordinates relative to the screen.
 	 */
@@ -484,6 +495,7 @@ public abstract class GameObject extends GameAPI {
 		
 		for (int i = 0; i < fragNum; i++) {
 			Fragment frag = new Fragment(fragName);
+			frag.setRenderPriority(this.getRenderPriority());
 			frag.throwObj( r.nextDouble()*2*Math.PI, r.nextInt(maxSpeed - minSpeed) + minSpeed);
 			frag.declare(this.getX() + fragOffsetX,this.getY() + fragOffsetY);
 		}
@@ -638,6 +650,11 @@ public abstract class GameObject extends GameAPI {
 	 * @return True if the objects collide; false otherwise
 	 */
 	public boolean isColliding (GameObject obj) {
+		
+		if (!this.collsionsEnabled || !obj.collsionsEnabled) {
+			return false;
+		}
+		
 		if (obj == null) {
 			return false;
 		}
@@ -673,6 +690,11 @@ public abstract class GameObject extends GameAPI {
 		return false;
 	}
 	public boolean isColliding (Rectangle hitbox) {
+		
+		if (!this.collsionsEnabled) {
+			return false;
+		}
+		
 		Rectangle[] thisHitbox = hitboxes ();
 		Rectangle objHitbox = hitbox;
 		if (thisHitbox.length == 0 || objHitbox == null) {
@@ -695,6 +717,10 @@ public abstract class GameObject extends GameAPI {
 	 * @return True if a collision was detected; false otherwise
 	 */
 	public boolean isColliding (String objectType) {
+		if (!this.collsionsEnabled) {
+			return false;
+		}
+		
 		lastCollision = ObjectHandler.checkCollision (objectType, this);
 		return lastCollision.collisionOccured ();
 	}
@@ -705,6 +731,9 @@ public abstract class GameObject extends GameAPI {
 	 * @return True if a collision was detected; false otherwise
 	 */
 	public boolean isCollidingChildren (String parentType) {
+		if (!this.collsionsEnabled) {
+			return false;
+		}
 		lastCollision = ObjectHandler.checkCollisionChildren (parentType, this);
 		return lastCollision.collisionOccured ();
 	}
