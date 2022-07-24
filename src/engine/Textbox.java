@@ -8,6 +8,7 @@ import java.util.Random;
 import java.util.Stack;
 
 import gameObjects.LetterBomb;
+import map.Room;
 
 
 
@@ -463,8 +464,7 @@ public class Textbox extends GameObject {
 		return (width * height)/256;
 	}
 	public void setTextSize(int textSize) {	
-		
-		fontSheet = new Sprite (Sprite.getScaledArr(getTextboxResource ("resources/sprites/Text/" + tempColor + ".png", "grid "+ this.textSize + " " + this.textSize, fontSheet.getOpacity()), textSize, textSize));
+		fontSheet = new Sprite (Sprite.getScaledArr(getTextboxResource ("resources/sprites/Text/" + tempColor + ".png", "grid "+ 16 + " " + 16, fontSheet.getOpacity()), textSize, textSize));
 		
 		
 		this.textSize = textSize;
@@ -478,7 +478,7 @@ public class Textbox extends GameObject {
 		
 		if (this.textSize != textSize) {
 
-			fontSheet = new Sprite (Sprite.getScaledArr(getTextboxResource ("resources/sprites/Text/" + tempColor + ".png", "grid "+ this.textSize + " " + this.textSize, fontSheet.getOpacity()), textSize, textSize));
+			fontSheet = new Sprite (Sprite.getScaledArr(getTextboxResource ("resources/sprites/Text/" + tempColor + ".png", "grid "+ 16 + " " + 16, fontSheet.getOpacity()), textSize, textSize));
 			
 			this.textSize = textSize;
 		}
@@ -615,45 +615,45 @@ public void drawBox () {
 		//draw the inside of the box tile by tile
 		for (int i = 0; i < width/8; i++) {
 			for (int j = 1; j < height/8; j++) {
-				textBoxBackground.draw((int)((this.getX() - GameCode.getViewX()) + (i * 8)),(int) ( (this.getY() - GameCode.getViewY()) + (j * 8) -10));
+				textBoxBackground.draw((int)((this.getX() - Room.getViewX()) + (i * 8)),(int) ( (this.getY() - Room.getViewY()) + (j * 8) -10));
 			}
 		}
 		//deal with drawing the inside of the box when the width not a multple of 8
 		if (width%8 != 0) {
 			for (int j = 1; j < height/8; j++) {
-				textBoxBackground.draw((int)((this.getX() - GameCode.getViewX()) + (this.width - (8 - (this.width%8)))),(int) ( (this.getY() - GameCode.getViewY()) + (j * 8) -10));
+				textBoxBackground.draw((int)((this.getX() - Room.getViewX()) + (this.width - (8 - (this.width%8)))),(int) ( (this.getY() - Room.getViewY()) + (j * 8) -10));
 			}	
 		}
 		
 		//deal with drawing the inside of the box when the height is not a multiple of 8
 		if (height%8 != 0) {
 			for (int j = 1; j < width/8; j++) {
-				textBoxBackground.draw((int)((this.getX() - GameCode.getViewX()) + (j * 8)),(int) ( (this.getY() - GameCode.getViewY()) + (this.height - (8 - (this.height%8))) -10));
+				textBoxBackground.draw((int)((this.getX() - Room.getViewX()) + (j * 8)),(int) ( (this.getY() - Room.getViewY()) + (this.height - (8 - (this.height%8))) -10));
 			}
 		}
 		
 		//draw the borders on the top and bottom
 		for (int i = 0; i < width/8; i++) {
-			textBoxTop.draw((int)((this.getX() - GameCode.getViewX()) + (i*8)), (int)((this.getY() - GameCode.getViewY()) -10));
-			textBoxBottum.draw((int)((this.getX() - GameCode.getViewX()) + (i*8)), (int)((this.getY() - GameCode.getViewY()) + (height) -10));
+			textBoxTop.draw((int)((this.getX() - Room.getViewX()) + (i*8)), (int)((this.getY() - Room.getViewY()) -10));
+			textBoxBottum.draw((int)((this.getX() - Room.getViewX()) + (i*8)), (int)((this.getY() - Room.getViewY()) + (height) -10));
 		}
 		
 		//deal with drawing the borders on the top and bottom when the box is not a multiple of 8 for size
 		if (width%8 != 0) {
-			textBoxTop.draw((int)((this.getX() - GameCode.getViewX()) + (this.width - (8 - (this.width%8)))), (int)((this.getY() - GameCode.getViewY()) -10));
-			textBoxBottum.draw((int)((this.getX() - GameCode.getViewX()) + (this.width - (8 - (this.width%8)))), (int)((this.getY() - GameCode.getViewY()) + (height) -10));
+			textBoxTop.draw((int)((this.getX() - Room.getViewX()) + (this.width - (8 - (this.width%8)))), (int)((this.getY() - Room.getViewY()) -10));
+			textBoxBottum.draw((int)((this.getX() - Room.getViewX()) + (this.width - (8 - (this.width%8)))), (int)((this.getY() - Room.getViewY()) + (height) -10));
 		}
 		
 		//draw the borders on the side
 		for (int i = 1; i < height/8; i++) {
-			textBoxSides.draw((int)((this.getX() - GameCode.getViewX())), (int)((this.getY() - GameCode.getViewY())+ (i*8) -10));
-			textBoxSides.draw((int)((this.getX() - GameCode.getViewX()) +(width)), (int)((this.getY()  - GameCode.getViewY())+ (i*8) -10));
+			textBoxSides.draw((int)((this.getX() - Room.getViewX())), (int)((this.getY() - Room.getViewY())+ (i*8) -10));
+			textBoxSides.draw((int)((this.getX() - Room.getViewX()) +(width)), (int)((this.getY()  - Room.getViewY())+ (i*8) -10));
 		}
 		//deal with drawing the borders on the sides when the box is not a multiple of 8 high
 		
 		if (height %8 != 0) {
-			textBoxSides.draw((int)((this.getX() - GameCode.getViewX())), (int)((this.getY() - GameCode.getViewY())+ (this.height - (8 - (this.height%8))) -10));
-			textBoxSides.draw((int)((this.getX() - GameCode.getViewX()) +(width)), (int)((this.getY()  - GameCode.getViewY())+ (this.height - (8 - (this.height%8))) -10));
+			textBoxSides.draw((int)((this.getX() - Room.getViewX())), (int)((this.getY() - Room.getViewY())+ (this.height - (8 - (this.height%8))) -10));
+			textBoxSides.draw((int)((this.getX() - Room.getViewX()) +(width)), (int)((this.getY()  - Room.getViewY())+ (this.height - (8 - (this.height%8))) -10));
 		}
 		
 	}
@@ -830,9 +830,9 @@ public void drawBox () {
 			}
 		}	
 		
-		if (xPos > GameCode.getViewX() && xPos < GameCode.getViewX() + GameCode.getResolutionX() && yPos > GameCode.getViewY() && yPos < GameCode.getViewY() + GameCode.getResolutionY()) {
+		if (xPos > Room.getViewX() && xPos < Room.getViewX() + GameCode.getResolutionX() && yPos > Room.getViewY() && yPos < Room.getViewY() + GameCode.getResolutionY()) {
 		
-			fontSheet.draw(xPos + (int)shakeOffsetX - GameCode.getViewX (), yPos + (int)shakeOffsetY - GameCode.getViewY (), text.charAt(i));
+			fontSheet.draw(xPos + (int)shakeOffsetX - Room.getViewX (), yPos + (int)shakeOffsetY - Room.getViewY (), text.charAt(i));
 			if (textSize > largestSize) {
 				largestSize = textSize;
 			}
@@ -919,7 +919,7 @@ public void explodeOldText()
 		}	
 		
 		LetterBomb b = new LetterBomb (drawChar);
-		b.declare(xPos,yPos);
+		b.declare(xPos + Room.getViewX(),yPos + Room.getViewY());
 		b.setRenderPriority(this.getRenderPriority());
 		
 		xPos = xPos + textSize;
@@ -1311,7 +1311,7 @@ private int dealWithTilde (String message, int startI) {
 public void draw () {
 		Rectangle thisRect = new Rectangle ((int)this.getX(), (int)this.getY(), this.width, this.height);
 	
-		Rectangle veiwport = new Rectangle ((int) GameCode.getViewX(), (int) GameCode.getViewY(), GameCode.getResolutionX (), GameCode.getResolutionY ());
+		Rectangle veiwport = new Rectangle ((int) Room.getViewX(), (int) Room.getViewY(), GameCode.getResolutionX (), GameCode.getResolutionY ());
 		if (thisRect.intersects(veiwport)) {
 			this.drawBox();
 		}

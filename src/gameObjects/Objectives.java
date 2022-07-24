@@ -2,6 +2,7 @@ package gameObjects;
 
 import java.util.ArrayList;
 
+import engine.GameCode;
 import engine.GameObject;
 import engine.ObjectHandler;
 
@@ -10,15 +11,17 @@ public class Objectives {
 	
 	
 	//represtent completed golf holes
-	boolean grassHole = false;
-	boolean desertHole = false;
-	boolean mountainHole = false;
+	boolean grassHole = true;
+	boolean desertHole = true;
+	boolean mountainHole = true;
+	
+	boolean hasGolfClub = false;
 	
 	//found cactuses and tornados
 	int foundCactuses = 0;
 	int foundTornados = 0;
 	
-	boolean hasBombNado = false;
+	boolean hasBombNado = true;
 	boolean hasCactusBombs = false;
 	
 	public Objectives() {
@@ -40,13 +43,43 @@ public class Objectives {
 		this.onObjectiveComplete();
 	}
 	
+	public void giveGolfClub () {
+		hasGolfClub = true;
+		
+		GolfClub g = new GolfClub ();
+		g.onPickup();
+		g.setX(GameCode.getBombMaster().getX());
+		g.setY(GameCode.getBombMaster().getY() - 32);
+		
+		g.declare();
+		
+		Hud.bar.updateWeaponsBar();
+		this.onObjectiveComplete();
+	}
+	
 	public void giveCactusBombs() {
 		hasCactusBombs = true;
+		CactusBombs c = new CactusBombs ();
+		c.onPickup();
+		c.setX(GameCode.getBombMaster().getX());
+		c.setY(GameCode.getBombMaster().getY() - 32);
+		
+		c.declare();
+		
 		this.onObjectiveComplete();
 	}
 	
 	public void giveBombNado() {
 		hasBombNado = true;
+		
+		BombNado bn = new BombNado ();
+		bn.onPickup();
+		bn.setX(GameCode.getBombMaster().getX() - 5);
+		bn.setY(GameCode.getBombMaster().getY() - 49);
+		
+		bn.declare();
+		
+		Hud.bar.updateWeaponsBar();
 		this.onObjectiveComplete();
 	}
 	
@@ -71,6 +104,10 @@ public class Objectives {
 		//updates all NPC text
 		ArrayList <ArrayList <GameObject>> npcList = ObjectHandler.getChildrenByName("NPC");
 		
+		if (npcList == null) {
+			return;
+		}
+		
 		for (int i = 0; i < npcList.size(); i++) {
 			for (int j = 0; j < npcList.get(i).size(); j++) {
 			NPC cur = (NPC) npcList.get(i).get(j);
@@ -81,7 +118,9 @@ public class Objectives {
 		
 	}
 	
-	
+	public boolean hasGolfClub () {
+		return hasGolfClub;
+	}
 	
 	public boolean hasCompleteMountainHole() {
 		return mountainHole;

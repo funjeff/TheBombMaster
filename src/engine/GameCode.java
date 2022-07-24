@@ -11,6 +11,9 @@ import gameObjects.Bombmire;
 import gameObjects.Cactus;
 import gameObjects.CactusDude;
 import gameObjects.CactusFarmer;
+import gameObjects.DesertHole;
+import gameObjects.GolfBall;
+import gameObjects.GolfHole;
 import gameObjects.WhatsUpDude;
 import gameObjects.Heart;
 import gameObjects.Hud;
@@ -32,8 +35,6 @@ public class GameCode {
 	static ArrayList <Asker> askers = new ArrayList <Asker> ();
 	
 
-	static TornadoFarmer e = new TornadoFarmer ();
-	static CactusFarmer e1 = new CactusFarmer ();
 
 	public static void testBitch () {
 		
@@ -60,34 +61,45 @@ public class GameCode {
 		Hud hud = new Hud();
 		hud.declare();
 		
-		e.declare (200,100);
-		e1.declare(260, 100);
 		
-		Tornado t = new Tornado();
+		GolfBall b = new GolfBall ();
+		b.declare(300, 200);
 		
-		t.declare(400, 200);
-        
-		Tornado t2 = new Tornado();
+		DesertHole h = new DesertHole ();
+		h.declare(400, 200);
 		
-		t2.declare(400, 300);
-        
-		Tornado t3 = new Tornado();
+		BombGolfCounter bc = new BombGolfCounter ();
+		bc.declare(100, 200);
 		
-		t3.declare(400, 400);
-        
 		
-		Cactus c1 = new Cactus();
-		
-		c1.declare(100, 200);
-        
-		Cactus c2 = new Cactus();
-		
-		c2.declare(100, 300);
-		
-		Cactus c3 = new Cactus();
-		
-		c3.declare(100, 400);
-		
+//		e.declare (200,100);
+//		e1.declare(260, 100);
+//		
+//		Tornado t = new Tornado();
+//		
+//		t.declare(400, 200);
+//        
+//		Tornado t2 = new Tornado();
+//		
+//		t2.declare(400, 300);
+//        
+//		Tornado t3 = new Tornado();
+//		
+//		t3.declare(400, 400);
+//        
+//		
+//		Cactus c1 = new Cactus();
+//		
+//		c1.declare(100, 200);
+//        
+//		Cactus c2 = new Cactus();
+//		
+//		c2.declare(100, 300);
+//		
+//		Cactus c3 = new Cactus();
+//		
+//		c3.declare(100, 400);
+//		
 		
 	//	Bat b = new Bat();
 	//	b.declare(300,200);
@@ -96,7 +108,7 @@ public class GameCode {
 //		c.declare(300,100);
 
 //		Bombhog h = new Bombhog();
-//		h.declare(200,200);
+//		h.declare(800,200);
 //		
 //		Heart h = new Heart ();
 //		h.declare(350,250);

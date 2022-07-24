@@ -40,8 +40,9 @@ public class NPC extends GameObject {
 
 	public void onClose () {
 		text.forget();
-		this.initText();
 		GameCode.getBombMaster().unfreeze();
+		//many init texts freeze player so it has to go in this order to be correct
+		this.initText();
 	}
 	
 	public void updateForObjectives() {

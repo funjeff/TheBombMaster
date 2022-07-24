@@ -143,8 +143,8 @@ public abstract class GameObject extends GameAPI {
 	
 	double prevAngle;
 	
-	double direction = -1;
-	double speed = 0;
+	public double direction = -1;
+	public double speed = 0;
 	
 	protected Point iris;
 	
@@ -573,6 +573,12 @@ public abstract class GameObject extends GameAPI {
 		this.direction = direction;
 		this.speed = speed;
 	}
+	public void setThrowDirection(double newDirection) {
+		this.direction = newDirection;
+	}
+	public double getThrowDirection () {
+		return direction;
+	}
 	/**
 	 * uses the rotate method in animation handler to rotate the sprite also adjusts the hitbox to match (kinda)
 	 * @param rotation the angle to rotate the sprte to (actually in degrees belive it or not)
@@ -762,6 +768,14 @@ public abstract class GameObject extends GameAPI {
 		return y;
 	}
 	
+	public double getCenterX() {
+		return x + hitbox().width/2;
+	}
+	
+	public double getCenterY() {
+		return y + hitbox().height/2;
+	}
+	
 	/**
 	 * Gets the x component of this GameObject's previous position.
 	 * @return The x coordinate of this GameObject
@@ -931,6 +945,13 @@ public abstract class GameObject extends GameAPI {
 		spriteX =  (spriteX + (val - x));
 		x = val;
 	}
+	
+	public void setCenterX (double val) {
+		xprevious = x;
+		spriteX =  (spriteX + ((val - hitbox().width/2) - x));
+		x = val - hitbox().width/2;
+	}
+	
 	public double getSpriteX() {
 		return spriteX;
 	}
@@ -1060,6 +1081,14 @@ public abstract class GameObject extends GameAPI {
 		spriteY =  (spriteY + (val - y));
 		y = val;
 	}
+	
+	public void setCenterY (double val) {
+		yprevious = y;
+		spriteY =  (spriteY + ((val - hitbox().height/2) - y));
+		y = val - hitbox().height/2;
+	}
+	
+	
 	/*
 	 * override to write code that is run on declaration of this object
 	 */

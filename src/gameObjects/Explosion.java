@@ -36,8 +36,7 @@ public class Explosion extends GameObject {
 				curFrame = this.getAnimationHandler().getFrame();
 			}
 			
-			if (this.getAnimationHandler().getFrame() < curFrame || this.getAnimationHandler().getFrame() == this.getSprite().getFrameCount()) {
-				
+			if (this.getAnimationHandler().getFrame() < curFrame || this.getAnimationHandler().getFrame() == this.getSprite().getFrameCount() - 1) {
 				this.forget();
 			}
 		}

@@ -421,7 +421,7 @@ public class Room {
 						} else if (dataList.get(index).isSolid() && isCollidingWithTile (obj.hitbox (), wx, wy)) {
 							foundCollision = true;
 						}
-						System.out.println ("OUTSIDE: " + index);
+						//System.out.println ("OUTSIDE: " + index);
 				} else {
 					try {
 					for (int b = 0; b < mapObjects.get(toPackedLong(wx,wy)).size(); b++ ) {
@@ -432,7 +432,7 @@ public class Room {
 							return true;
 						}
 					}
-					System.out.println ("OUTSIDE: " + index);
+					//System.out.println ("OUTSIDE: " + index);
 					if (dataList.get(index).isSolid() && isCollidingWithTile (obj.hitbox (), wx, wy)) {
 						foundCollision = true;
 					}

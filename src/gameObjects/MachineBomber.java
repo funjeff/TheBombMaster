@@ -30,7 +30,7 @@ public class MachineBomber extends GameObject {
 			
 			if (this.getAnimationHandler().getFrame() == 4) {
 				
-				
+			
 				Random r = new Random ();
 				
 				if (r.nextInt(4) == 1) {

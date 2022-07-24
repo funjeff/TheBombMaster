@@ -7,6 +7,7 @@ import engine.GameCode;
 import engine.GameObject;
 import engine.Sprite;
 import engine.SpriteParser;
+import map.Room;
 
 //not a virus I swear
 public class LetterBomb extends GameObject{
@@ -29,7 +30,7 @@ public class LetterBomb extends GameObject{
 	@Override
 	public void frameEvent () {
 		this.setY(this.getY() + speed);
-		if (this.getY() + 16 > GameCode.getViewY() + GameCode.getResolutionY()) {
+		if (this.getY() + 16 > Room.getViewY() + GameCode.getResolutionY()) {
 			Explosion e = new Explosion();
 			e.makeAsteticOnly();
 			e.setRenderPriority(this.getRenderPriority());

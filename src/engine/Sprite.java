@@ -471,6 +471,7 @@ public class Sprite {
 			toScale.setFrame(i,bimage);
 		}
 	}
+	
 	/**
 	 * Gets the BufferedImage associated with the given filepath.
 	 * @param path the filepath to use

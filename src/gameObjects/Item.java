@@ -195,6 +195,7 @@ public class Item extends GameObject{
 		
 		leftCannon.setX(Room.getViewX() - 120);
 		leftCannon.setY(Room.getViewY() + 458);
+		
 		leftCannon.getAnimationHandler().setFlipHorizontal(true);
 		
 		leftCannon.setRenderPriority(2);
@@ -203,7 +204,7 @@ public class Item extends GameObject{
 		GameCode.getBombMaster().disableCollisions();
 		
 		xDistPerFrame = ((Room.getViewX() + 480) - (int)this.getX())/framesToCenter;
-		yDistPerFrame = ((Room.getViewX() + 160) - (int)this.getY())/framesToCenter;
+		yDistPerFrame = ((Room.getViewY() + 160) - (int)this.getY())/framesToCenter;
 		
 		
 //		e = new Explosion (90);

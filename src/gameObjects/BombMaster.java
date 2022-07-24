@@ -2,6 +2,7 @@ package gameObjects;
 
 import javax.swing.plaf.basic.BasicComboBoxUI.KeyHandler;
 
+import engine.CollisionInfo;
 import engine.GameCode;
 import engine.GameObject;
 import engine.ObjectHandler;
@@ -9,6 +10,7 @@ import engine.Sprite;
 import map.Room;
 
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class BombMaster extends GameObject {
@@ -23,9 +25,7 @@ public class BombMaster extends GameObject {
 	public static final Sprite SIDE_LEGS_WALK = new Sprite ("resources/sprites/config/bombMaster/legs/walk/sides.txt");
 	public static final Sprite DIAGONAL_LEGS_WALK = new Sprite ("resources/sprites/config/bombMaster/legs/walk/digonal.txt");
 	
-	
 	boolean throwingBomb = false;
-	
 
 	Legs myLegs = new Legs();
 	
@@ -41,6 +41,8 @@ public class BombMaster extends GameObject {
 	
 	static Objectives objectives = new Objectives ();
 	
+	SwingingClub club = new SwingingClub();
+	
 	public BombMaster()
 	{
 		this.setRenderPriority(2);
@@ -53,6 +55,7 @@ public class BombMaster extends GameObject {
 	
 	@Override
 	public void frameEvent () {
+		
 		
 		if (this.isCollidingChildren("NPC") && GameCode.keyPressed(KeyEvent.VK_ENTER, this) &&!frozen) {
 			((NPC)this.getCollisionInfo().getCollidingObjects().get(0)).onTalk();
@@ -113,47 +116,167 @@ public class BombMaster extends GameObject {
 	@Override
 	public void draw() {
 		
+		boolean spawnedClub = false;
 		
 		if (this.getSprite().equals(SIDE) && this.getAnimationHandler().flipHorizontal()) {
 			myLegs.setY(this.getY() + this.getSprite().getHeight() - 5);
 			myLegs.setX(this.getX() + 13);
+			
+			boolean useWeapon = GameCode.keyPressed(KeyEvent.VK_SHIFT, this);
+			
+			if (useWeapon && !club.declared() && Hud.bar.golfClubSelected()) {
+				club.swingLeft();
+				
+				club.setX(this.getX() + 12);
+				club.setY(this.getY() + 25);
+				spawnedClub = true;
+			}
+			
+			if (useWeapon && Hud.bar.bombNadoSelected()) {
+				BombNadoProjectile proj = new BombNadoProjectile ();
+				proj.declare(this.getX(), this.getY());
+				proj.throwObj(Math.PI,4);
+			}
+			
 		}
 		
 		if (this.getSprite().equals(SIDE) && !this.getAnimationHandler().flipHorizontal()) {
 			myLegs.setY(this.getY() + this.getSprite().getHeight() - 4);
 			myLegs.setX(this.getX() + 7);
+			
+			boolean useWeapon = GameCode.keyPressed(KeyEvent.VK_SHIFT, this);
+			
+			if (useWeapon && !club.declared()  && Hud.bar.golfClubSelected()) {
+				club.swingRight();
+				club.setX(this.getX() + 22);
+				club.setY(this.getY() + 25);
+				spawnedClub = true;
+			}
+			if (useWeapon && Hud.bar.bombNadoSelected()) {
+				BombNadoProjectile proj = new BombNadoProjectile ();
+				proj.declare(this.getX(), this.getY());
+				proj.throwObj(0,4);
+			}
 		}
 		
 		if (this.getSprite().equals(FORWARD)) {
 			myLegs.setY(this.getY() + this.getSprite().getHeight());
 			myLegs.setX(this.getX() + 7);
+			
+			boolean useWeapon = GameCode.keyPressed(KeyEvent.VK_SHIFT, this);
+			
+			if ( useWeapon && !club.declared() && Hud.bar.golfClubSelected()) {
+				club.swingDown();
+				club.setX(this.getX() + 13);
+				club.setY(this.getY() + 40);
+				spawnedClub = true;
+			}		
+			if (useWeapon && Hud.bar.bombNadoSelected()) {
+				BombNadoProjectile proj = new BombNadoProjectile ();
+				proj.declare(this.getX(), this.getY() + 25);
+				proj.throwObj(3*Math.PI/2,4);
+			}
 		}
 		
 		if (this.getSprite().equals(BACK)) {
 			myLegs.setY(this.getY() + this.getSprite().getHeight() - 3);
 			myLegs.setX(this.getX() + 5);
+			
+			boolean useWeapon = GameCode.keyPressed(KeyEvent.VK_SHIFT, this);
+			
+			if (useWeapon && !club.declared() && Hud.bar.golfClubSelected()) {
+				club.swingUp();
+				club.setX(this.getX() + 10);
+				club.setY(this.getY() + 5);
+				spawnedClub = true;
+			}
+			if (useWeapon && Hud.bar.bombNadoSelected()) {
+				BombNadoProjectile proj = new BombNadoProjectile ();
+				proj.declare(this.getX(), this.getY() - 25);
+				proj.throwObj(Math.PI/2,4);
+			}
 		}
 		if (this.getSprite().equals(DIAGONAL_FORWARD) && this.getAnimationHandler().flipHorizontal()) {
 			myLegs.setY(this.getY() + this.getSprite().getHeight() - 11);
 			myLegs.setX(this.getX() + 23);
+			
+			boolean useWeapon = GameCode.keyPressed(KeyEvent.VK_SHIFT, this);
+			
+			if (useWeapon && !club.declared() && Hud.bar.golfClubSelected()) {
+				club.swingDownRight();
+				club.setX(this.getX() + 40);
+				club.setY(this.getY() + 40);
+				spawnedClub = true;
+			}
+			if (useWeapon && Hud.bar.bombNadoSelected()) {
+				BombNadoProjectile proj = new BombNadoProjectile ();
+				proj.declare(this.getX() + 20, this.getY() + 20);
+				proj.throwObj(7*Math.PI/4,4);
+			}
 		}
 		if (this.getSprite().equals(DIAGONAL_FORWARD) && !this.getAnimationHandler().flipHorizontal()) {
 			myLegs.setY(this.getY() + this.getSprite().getHeight() - 11);
 			myLegs.setX(this.getX() -4);
+		
+			boolean useWeapon = GameCode.keyPressed(KeyEvent.VK_SHIFT, this);
+			
+			if (useWeapon && !club.declared() && Hud.bar.golfClubSelected()) {
+				club.swingDownLeft();
+				club.setX(this.getX() + 10);
+				club.setY(this.getY() + 40);
+				spawnedClub = true;
+			}
+			if (useWeapon && Hud.bar.bombNadoSelected()) {
+				BombNadoProjectile proj = new BombNadoProjectile ();
+				proj.declare(this.getX() - 20, this.getY() + 20);
+				proj.throwObj(5*Math.PI/4,4);
+			}
 		}
 		
 		if (this.getSprite().equals(DIAGONAL_BACK) && this.getAnimationHandler().flipHorizontal()) {
 			myLegs.setY(this.getY() + this.getSprite().getHeight() - 15);
 			myLegs.setX(this.getX() + 23);
+			
+			boolean useWeapon = GameCode.keyPressed(KeyEvent.VK_SHIFT, this);
+			
+			if (useWeapon && !club.declared() && Hud.bar.golfClubSelected()) {
+				club.swingUpLeft();
+				club.setX(this.getX() + 13);
+				club.setY(this.getY() + 4);
+				spawnedClub = true;
+			}
+			if (useWeapon && Hud.bar.bombNadoSelected()) {
+				BombNadoProjectile proj = new BombNadoProjectile ();
+				proj.declare(this.getX() - 20, this.getY() - 20);
+				proj.throwObj(3*Math.PI/4,4);
+			}
 		}
 		if (this.getSprite().equals(DIAGONAL_BACK) && !this.getAnimationHandler().flipHorizontal()) {
 			myLegs.setY(this.getY() + this.getSprite().getHeight() - 15);
 			myLegs.setX(this.getX());
+			
+			boolean useWeapon = GameCode.keyPressed(KeyEvent.VK_SHIFT, this);
+			
+			if (useWeapon && !club.declared() && Hud.bar.golfClubSelected()) {
+				club.swingUpRight();
+				club.setX(this.getX() + 33);
+				club.setY(this.getY() + 7);
+				spawnedClub = true;
+			}
+			if (useWeapon && Hud.bar.bombNadoSelected()) {
+				BombNadoProjectile proj = new BombNadoProjectile ();
+				proj.declare(this.getX() + 20, this.getY() - 20);
+				proj.throwObj(Math.PI/4,4);
+			}
 		}
 		
 		
 		myLegs.draw();
 		
+		
+		if (club.declared() && !spawnedClub) {
+			club.realDraw();
+		}
 		
 		super.draw();
 		
@@ -399,6 +522,14 @@ public class BombMaster extends GameObject {
 				}
 			}
 			
+			if (beingThrown != null && beingThrown.declared()) {
+				if (objectives.hasCactusBombs()) {
+					beingThrown.setBombSprites("cactus");
+					beingThrown.setFragsType("cactus bomb fragment");
+					beingThrown.doCactusEffect();
+				}
+			}
+			
 			
 			
 			if (this.getAnimationHandler().getFrame() == this.getSprite().getFrameCount() - 1) {
@@ -434,7 +565,7 @@ public class BombMaster extends GameObject {
 		//handles walking right
   		if (keyDown('D') && !keyDown('W') && !keyDown('S')) {
 			
-			if (!throwingBomb) {
+			if (!throwingBomb && !club.declared()) {
 				this.setSprite(SIDE);
 				myLegs.setSprite(SIDE_LEGS_WALK);
 			
@@ -445,12 +576,13 @@ public class BombMaster extends GameObject {
 			}
 			
 			this.goX(this.getX() + 4);
+			club.setX(club.getX() + 4);
 		}
 		
 		//handles walking left
 		if (keyDown('A') && !keyDown('W') && !keyDown('S')) {
 			
-			if (!throwingBomb) {
+			if (!throwingBomb && !club.declared()) {
 				this.setSprite(SIDE);
 				myLegs.setSprite(SIDE_LEGS_WALK);
 			
@@ -461,12 +593,13 @@ public class BombMaster extends GameObject {
 			}
 			
 			this.goX(this.getX() - 4);
+			club.setX(club.getX() - 4);
 		}
 		
 		//handles walking up
 		if (keyDown('W') && !keyDown('A') && !keyDown('D')) {
 			
-			if (!throwingBomb) {
+			if (!throwingBomb && !club.declared()) {
 				this.setSprite(BACK);
 				myLegs.setSprite(FORWARD_LEGS_WALK);
 			
@@ -477,12 +610,13 @@ public class BombMaster extends GameObject {
 			}
 			
 			this.goY(this.getY() - 4);
+			club.setY(club.getY() - 4);
 		}
 		
 		
 		//handles walking down
 		if (keyDown('S') && !keyDown('A') && !keyDown('D')) {
-			if (!throwingBomb) {
+			if (!throwingBomb && !club.declared()) {
 				this.setSprite(FORWARD);
 				myLegs.setSprite(FORWARD_LEGS_WALK);
 			
@@ -493,12 +627,13 @@ public class BombMaster extends GameObject {
 			}
 			
 			this.goY(this.getY() + 4);
+			club.setY(club.getY() + 4);
 		}
 		
 		//handles walking downleft
 		if (keyDown('S') && keyDown('A')) {
 			
-			if (!throwingBomb) {
+			if (!throwingBomb && !club.declared()) {
 				this.setSprite(DIAGONAL_FORWARD);
 				myLegs.setSprite(DIAGONAL_LEGS_WALK);
 			
@@ -511,12 +646,15 @@ public class BombMaster extends GameObject {
 			
 			this.goX(this.getX() - 4);
 			this.goY(this.getY() + 4);	
+			club.setX(club.getX() - 4);
+			club.setY(club.getY() + 4);
+		
 		}
 		
 		//handles walking downright
 		if (keyDown('S') && keyDown('D') && !keyDown('A')) {
 			
-			if (!throwingBomb) {
+			if (!throwingBomb && !club.declared()) {
 				this.setSprite(DIAGONAL_FORWARD);
 				myLegs.setSprite(DIAGONAL_LEGS_WALK);
 						
@@ -528,11 +666,14 @@ public class BombMaster extends GameObject {
 			
 			this.goX(this.getX() + 4);
 			this.goY(this.getY() + 4);	
+			club.setX(club.getX() + 4);
+			club.setY(club.getY() + 4);
+		
 		}
 		
 		//handles walking upright
 			if (keyDown('W') && keyDown('D') && !keyDown('A')) {
-				if (!throwingBomb) {
+				if (!throwingBomb && !club.declared()) {
 					this.setSprite(DIAGONAL_BACK);
 					myLegs.setSprite(DIAGONAL_LEGS_WALK);
 							
@@ -544,12 +685,15 @@ public class BombMaster extends GameObject {
 				
 				this.goX(this.getX() + 4);
 				this.goY(this.getY() - 4);	
+				club.setX(club.getX() + 4);
+				club.setY(club.getY() - 4);
+			
 			}
 			
 			//handles walking upleft
 			if (keyDown('W') && keyDown('A')) {
 				
-				if (!throwingBomb) {
+				if (!throwingBomb && !club.declared()) {
 					this.setSprite(DIAGONAL_BACK);
 					myLegs.setSprite(DIAGONAL_LEGS_WALK);
 						
@@ -561,6 +705,9 @@ public class BombMaster extends GameObject {
 				
 				this.goX(this.getX() - 4);
 				this.goY(this.getY() - 4);	
+				club.setX(club.getX() - 4);
+				club.setY(club.getY() - 4);
+			
 			}
 			
 			
@@ -606,5 +753,142 @@ public class BombMaster extends GameObject {
 			
 		}
 		
+	}
+	
+	public class SwingingClub extends GameObject {
+		
+		double startRotation;
+		double endRoataion;
+		
+		ArrayList <Bomb> refectedBombs = new ArrayList <Bomb> ();
+		
+		public SwingingClub () {
+			this.setSprite(new Sprite ("resources/sprites/golf club.png"));
+			
+			//Im pretty sure I remember us saying something about pixel collisions not being compadable with rotations
+			//this.enablePixelCollisions();
+			//this.adjustHitboxBorders();
+			this.setGameLogicPriority(-10);
+		}
+		
+		public void frameEvent () {
+			
+			
+			
+			startRotation = startRotation - .3;
+			this.setDrawRotation(startRotation);
+			if (startRotation < endRoataion) {
+				refectedBombs = new ArrayList <Bomb> ();
+				this.forget();
+			}
+			
+			if (this.isColliding("Bomb")) {
+				ArrayList <GameObject> bombs = this.getCollisionInfo().getCollidingObjects();
+				
+				ArrayList <GameObject> us = new ArrayList <GameObject> ();
+				us.add(this);
+				
+				us.addAll(bombs);
+				
+				for (int i =0; i < refectedBombs.size(); i++) {
+					Bomb cur = (Bomb) refectedBombs.get(i);
+					cur.getOwners().addAll(bombs);
+				}
+				
+				us.addAll(refectedBombs);
+				
+				for (int i = 0; i < bombs.size(); i++) {
+					Bomb cur = (Bomb) bombs.get(i);
+					
+					if (!cur.getOwners().contains(this)) {
+						cur.reset();
+						
+						refectedBombs.add(cur);
+						
+						us.add(GameCode.getBombMaster());
+						//all of your bombs are belong to us
+						cur.setOwners(us);
+						
+						cur.setThrowDirection(cur.getThrowDirection() + Math.PI);
+					}
+				}
+				
+				
+			}
+		}
+		
+		//dont want it getting drawn normally sience we need to draw it in a special way to get the layering right
+		@Override
+		public void draw() {
+			
+		}
+		
+		public void realDraw () {
+			super.draw();
+		}
+		
+		public void swingUpRight ()
+		{
+			startRotation = -1.0;
+			endRoataion = -3.4;
+			this.setHitboxAttributes(-8,-30,34, 30);
+			this.declare();
+		}
+		
+		public void swingUp ()
+		{
+			this.setHitboxAttributes(-16,-30,40, 30);
+			startRotation = -1.9;
+			endRoataion = -4.1;
+			this.declare();
+		}
+		
+		public void swingUpLeft ()
+		{
+			this.setHitboxAttributes(-28,-26,32, 39);
+			startRotation = -2.9;
+			endRoataion = -5.2;
+			this.declare();
+		}
+		
+		public void swingLeft ()
+		{
+			this.setHitboxAttributes(-28,-17,32, 37);
+			startRotation = -3.6;
+			endRoataion = -5.4;
+			this.declare();
+		}
+		
+		public void swingDownLeft ()
+		{
+			this.setHitboxAttributes(-28, 0,35, 27);
+			startRotation = 1.8;
+			endRoataion = -.5;
+			this.declare();
+		}
+		
+		public void swingDown ()
+		{
+			this.setHitboxAttributes(-16, 0,43, 27);
+			startRotation = 1.2;
+			endRoataion = -1.1;
+			this.declare();
+		}
+		
+		public void swingDownRight ()
+		{
+			this.setHitboxAttributes(0, -5,28, 32);
+			startRotation = .6;
+			endRoataion = -2.0;
+			this.declare();
+		}
+		
+		public void swingRight ()
+		{
+			this.setHitboxAttributes(0, -25,28, 35);
+			startRotation = -.9;
+			endRoataion = -2.6;
+			this.declare();
+		}
 	}
 }

@@ -6,6 +6,8 @@ import engine.Textbox;
 public class BombGolfCounter extends NPC {
 
 	boolean talkedOnce = false;
+	boolean loadedEndDiolog = false;
+	
 	
 	public BombGolfCounter () {
 		super();
@@ -28,14 +30,16 @@ public class BombGolfCounter extends NPC {
 	@Override
 	public void initText () {
 		talkedOnce = true;
-		updateForObjectives();
-		boolean hole1 = BombMaster.objectives.hasCompleteGrassHole();
-		boolean hole2 = BombMaster.objectives.hasCompleteDesertHole();
-		boolean hole3 = BombMaster.objectives.hasCompleteMountainHole();
 		
-		if (hole1 && hole2 && hole3) {
+		if (loadedEndDiolog) {
+			if (!BombMaster.objectives.hasGolfClub()) {
+				BombMaster.objectives.giveGolfClub();
+			}
 			resetTextbox("WE WILL ALLWAYS REMEMBER YOU AS A HERO");
 		}
+		
+		updateForObjectives();
+		
 		
 	}
 	
@@ -71,19 +75,20 @@ public class BombGolfCounter extends NPC {
 		}
 		if (!hole1 && hole2 && hole3) {
 			resetTextbox ("YOU GOT TWO OF THEM JUST ONE MORE TO GO!");
-			text.pushString("AND IT LOOKIS LIKE ITS IN THE GRASSLANDS");
+			text.pushString("AND IT LOOKS LIKE IT IS IN THE GRASSLANDS");
 		}
 		if (hole1 && !hole2 && hole3) {
 			resetTextbox ("YOU GOT TWO OF THEM JUST ONE MORE TO GO!");
-			text.pushString("AND IT LOOKIS LIKE ITS IN THE DESERT");
+			text.pushString("AND IT LOOKS LIKE IT IS IN THE DESERT");
 		}
 		if (hole1 && hole2 && !hole3) {
 			resetTextbox ("YOU GOT TWO OF THEM JUST ONE MORE TO GO!");
-			text.pushString("AND IT LOOKIS LIKE ITS IN THE MOUNTAIN");
+			text.pushString("AND IT LOOKS LIKE IT IS IN THE MOUNTAIN");
 		}
 		if (hole1 && hole2 && hole3) {
 			resetTextbox ("NO WAY YOU GOT ALL THE HOLES");
 			text.pushString("YOUR INSANE DUDE HERE TAKE THIS GOLF CLUB AS PROMISED");
+			loadedEndDiolog = true;
 		}
 		
 	}
