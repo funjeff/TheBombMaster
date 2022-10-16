@@ -61,15 +61,15 @@ public class GameCode {
 		Hud hud = new Hud();
 		hud.declare();
 		
+//		
+//		GolfBall b = new GolfBall ();
+//		b.declare(300, 200);
+//		
+//		DesertHole h = new DesertHole ();
+//		h.declare(400, 200);
 		
-		GolfBall b = new GolfBall ();
-		b.declare(300, 200);
-		
-		DesertHole h = new DesertHole ();
-		h.declare(400, 200);
-		
-		BombGolfCounter bc = new BombGolfCounter ();
-		bc.declare(100, 200);
+//		BombGolfCounter bc = new BombGolfCounter ();
+//		bc.declare(100, 200);
 		
 		
 //		e.declare (200,100);
@@ -101,8 +101,8 @@ public class GameCode {
 //		c3.declare(100, 400);
 //		
 		
-	//	Bat b = new Bat();
-	//	b.declare(300,200);
+//		Bat b = new Bat();
+//		b.declare(300,200);
 
 //		CactusDude c = new CactusDude();
 //		c.declare(300,100);
@@ -114,8 +114,8 @@ public class GameCode {
 //		h.declare(350,250);
 //		
 		
-//		MachineBomber mb = new MachineBomber();
-//		mb.declare(400,200);
+		MachineBomber mb = new MachineBomber();
+		mb.declare(400,200);
 		
 		//Test
 		//Room2 room2 = new Room2 ();

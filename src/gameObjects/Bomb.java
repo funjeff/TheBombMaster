@@ -44,6 +44,16 @@ public class Bomb extends GameObject {
 	
 	boolean cactusEffect = false;
 	
+	boolean on = true;
+	
+	boolean isMasterBomb = false;
+	
+	double curHue = 0.0;
+	
+	boolean redFlash = true;
+	
+	public static final int AFTERIMAGE_COUNT = 3;
+	
 	public Bomb (GameObject owner) {
 		this.setSprite(fullFuse);
 		
@@ -72,74 +82,107 @@ public class Bomb extends GameObject {
 	@Override
 	public void frameEvent() {
 		
+		if (isMasterBomb) {
+
+			AfterImage curLocation = new AfterImage();
+			
+			curLocation.setSprite(new Sprite (this.getSprite()));	
+			
+			curLocation.declare(this.getX(), this.getY());
+			
+			this.setSprite(new Sprite (fullFuseRed));
+			
+			curHue = curHue + 0.03;
+			
+			Sprite.tweekHue(getSprite(),curHue);
+				
+		}
+		
 		if (spawnedOnExplosion && !this.isColliding("Explosion")) {
 			spawnedOnExplosion = false;
 		}
 		
-		bombTimer = bombTimer - 1;
-		
-		if (tempImunity != 0) {
-			tempImunity = tempImunity -1;
-		}
-		
-		if (bombTimer == fullTimer * 2/3) {
-			fuseThird = 1;
-		}
-		
-		if (bombTimer == fullTimer * 1/3) {
-			fuseThird = 2;
-		}
-		
-		if (bombTimer == 0 || (!asteticOnly && this.isCollidingChildren("GameObject") && !owners.contains(this.getCollisionInfo().getCollidingObjects().get(0)) && tempImunity == 0)) {
-		
-//			System.out.println(this.getCollisionInfo().getCollidingObjects().get(0));
-//			System.out.println(owners);
+		if (on) {
+			bombTimer = bombTimer - 1;
 			
-			Explosion boom = new Explosion(bombSize);
-			
-			if (!cancelExplosion) {
-				boom.declare(this.getX() + this.hitbox().width/2 - boom.getSprite().getWidth()/2,this.getY() + this.hitbox().height/2 - boom.getSprite().getHeight()/2);
+			if (tempImunity != 0) {
+				tempImunity = tempImunity -1;
 			}
 			
-			if (!this.explsionSprite.equals("default")) {
-				boom.setSprite(new Sprite (this.explsionSprite));
+			if (bombTimer == fullTimer * 2/3) {
+				fuseThird = 1;
 			}
 			
-			if (asteticOnly) {
-				boom.makeAsteticOnly();
-			}
-			boom.setRenderPriority(this.getRenderPriority());
-			breakToFragments(fragmentString,minFrags,maxFrags);
-			
-			if (this.cactusEffect) {
-				this.shootCactusBombs(boom);
+			if (bombTimer == fullTimer * 1/3) {
+				fuseThird = 2;
 			}
 			
-			this.forget();
-		}
-		
-		if (fuseThird == 0) {
-			if (bombTimer % 5 == 0) {
-				this.setSprite(fullFuseRed);
-			} else {
-				this.setSprite(fullFuse);
+			if (redFlash) {
+				if (fuseThird == 0) {
+					if (bombTimer % 5 == 0) {
+						this.setSprite(fullFuseRed);
+					} else {
+						this.setSprite(fullFuse);
+					}
+				}
+				
+				if (fuseThird == 1) {
+					if (bombTimer % 3 == 0) {
+						this.setSprite(halfFuseRed);
+					} else {
+						this.setSprite(halfFuse);
+					}
+				}
+				
+				if (fuseThird == 2) {
+					if (bombTimer % 2 == 0) {
+						this.setSprite(noFuseRed);
+					} else {
+						this.setSprite(noFuse);
+					}
+				}
 			}
-		}
-		
-		if (fuseThird == 1) {
-			if (bombTimer % 3 == 0) {
-				this.setSprite(halfFuseRed);
-			} else {
-				this.setSprite(halfFuse);
+			
+			
+			if (bombTimer == 0 || (!asteticOnly && this.isCollidingChildren("GameObject") && !owners.contains(this.getCollisionInfo().getCollidingObjects().get(0)) && tempImunity == 0)) {
+			
+				if (bombTimer != 0) {
+					if (this.getCollisionInfo().getCollidingObjects().get(0) instanceof Explosion || this.getCollisionInfo().getCollidingObjects().get(0) instanceof NPC) {
+						super.frameEvent();
+						return;
+					}
+				}
+	//			System.out.println(this.getCollisionInfo().getCollidingObjects().get(0));
+	//			System.out.println(owners);
+				
+				Explosion boom = new Explosion(bombSize);
+				
+				if (isMasterBomb) {
+					boom.makeRainbow();
+				}
+				
+				if (!cancelExplosion) {
+					boom.declare(this.getX() + this.hitbox().width/2 - boom.getSprite().getWidth()/2,this.getY() + this.hitbox().height/2 - boom.getSprite().getHeight()/2);
+				}
+				
+				if (!this.explsionSprite.equals("default")) {
+					boom.setSprite(new Sprite (this.explsionSprite));
+				}
+				
+				if (asteticOnly) {
+					boom.makeAsteticOnly();
+				}
+				boom.setRenderPriority(this.getRenderPriority());
+				breakToFragments(fragmentString,minFrags,maxFrags);
+				
+				if (this.cactusEffect) {
+					this.shootCactusBombs(boom);
+				}
+				
+				this.forget();
 			}
-		}
-		
-		if (fuseThird == 2) {
-			if (bombTimer % 2 == 0) {
-				this.setSprite(noFuseRed);
-			} else {
-				this.setSprite(noFuse);
-			}
+			
+			
 		}
 	
 		super.frameEvent();
@@ -177,6 +220,9 @@ public class Bomb extends GameObject {
 		this.fragmentString = fragType;
 	}
 	
+	public void dontFlash () {
+		redFlash = false;
+	}
 	
 	@Override
 	public void gettingSploded() {
@@ -211,6 +257,13 @@ public class Bomb extends GameObject {
 		asteticOnly = true;
 	}
 	
+	public void makeMasterBomb() {
+		isMasterBomb = true;
+		Random rand = new Random ();
+		curHue = rand.nextDouble();
+		this.setSprite(fullFuseRed);
+	}
+	
 	public void setExplosionSprite (String explosionSprite) {
 		this.explsionSprite = explosionSprite;
 	}
@@ -229,6 +282,18 @@ public class Bomb extends GameObject {
 		fuseThird = 0;
 	}
 	
+	
+	public void turnOff () {
+		on = false;
+	}
+	
+	public void turnOn () {
+		on = true;
+	}
+	
+	public boolean isOn () {
+		return on;
+	}
 	
 	public ArrayList <GameObject> getOwners (){
 		return owners;
@@ -353,6 +418,47 @@ public class Bomb extends GameObject {
 		
 		
 		
+	}
+	
+	public class AfterImage extends GameObject {
+		int stepCount = 0;
+		
+
+		
+		public AfterImage () {
+			this.useSpriteHitbox();
+			this.disableCollisions();
+		}
+		
+		@Override
+		public void frameEvent () {
+			
+			
+		
+			stepCount = stepCount + 1;
+			
+			if (stepCount == AFTERIMAGE_COUNT) {
+				Explosion e = new Explosion ();
+				
+				e.makeRainbow();
+				
+				e.makeAsteticOnly();
+				e.declare();
+				e.setCenterX(this.getCenterX());
+				e.setCenterY(this.getCenterY());
+				
+				this.forget();
+			}
+			
+		}
+		
+	@Override
+	public void draw () {
+		// 2 is here to make the first one not entirly visable it basically makes the effect a lot more noticeable
+		//becasue its kinda hard to see with all the colors and everything
+		this.getSprite().setOpacity((float) ((1.0/AFTERIMAGE_COUNT) * (AFTERIMAGE_COUNT - stepCount))/2);
+		super.draw();
+	}
 	}
 	
 }

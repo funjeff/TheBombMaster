@@ -11,11 +11,11 @@ public class Objectives {
 	
 	
 	//represtent completed golf holes
-	boolean grassHole = true;
-	boolean desertHole = true;
-	boolean mountainHole = true;
+	boolean grassHole = false;
+	boolean desertHole = false;
+	boolean mountainHole = false;
 	
-	boolean hasGolfClub = false;
+	boolean hasGolfClub = true;
 	
 	//found cactuses and tornados
 	int foundCactuses = 0;
@@ -23,6 +23,9 @@ public class Objectives {
 	
 	boolean hasBombNado = true;
 	boolean hasCactusBombs = false;
+	boolean hasPegasusBombs = true;
+	
+	boolean hasMasterBombs = true;
 	
 	public Objectives() {
 		
@@ -65,6 +68,12 @@ public class Objectives {
 		c.setY(GameCode.getBombMaster().getY() - 32);
 		
 		c.declare();
+		
+		this.onObjectiveComplete();
+	}
+	
+	public void givePegasusBombs() {
+		hasPegasusBombs = true;
 		
 		this.onObjectiveComplete();
 	}
@@ -141,6 +150,10 @@ public class Objectives {
 	public boolean hasBombNado() {
 		return hasBombNado;
 	}
+	
+	public boolean hasPegasusBombs() {
+		return hasPegasusBombs;
+	}
 
 	public boolean hasAllCactuses () {
 		return foundCactuses == 3;
@@ -148,6 +161,10 @@ public class Objectives {
 	
 	public boolean hasAllTornados () {
 		return foundTornados == 3;
+	}
+	
+	public boolean hasMasterBombs () {
+		return hasMasterBombs;
 	}
 	
 }

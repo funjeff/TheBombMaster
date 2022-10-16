@@ -20,8 +20,12 @@ public class WeaponBar extends GameObject {
 	
 	public ArrayList <WeaponBox> boxes = new ArrayList <WeaponBox> ();
 	
-	public static final int BOMBNADO_PREFERED_SLOT = 2;
+	
+	
+
 	public static final int GOLF_CLUB_PREFERED_SLOT = 1;
+	public static final int BOMBNADO_PREFERED_SLOT = 2;
+	public static final int PEGASUS_BOMBS_PREFERED_SLOT = 3;
 	
 	Textbox weaponName = new Textbox ("empty");
 	
@@ -30,6 +34,7 @@ public class WeaponBar extends GameObject {
 	public WeaponBar () {
 		weaponName.changeBoxVisability();
 		this.setGameLogicPriority(2);
+		updateWeaponsBar();
 	}
 	
 	@Override
@@ -251,6 +256,10 @@ public class WeaponBar extends GameObject {
 			weaponCount = weaponCount + 1;
 		}
 		
+		if (BombMaster.objectives.hasPegasusBombs()) {
+			weaponCount = weaponCount + 1;
+		}
+		
 		//weapon count should be finalized by this point
 		
 		weapons = new String [weaponCount];
@@ -260,7 +269,7 @@ public class WeaponBar extends GameObject {
 		ArrayList <String> unavailabeSlots = new ArrayList <String> ();
 		
 		if (BombMaster.objectives.hasGolfClub()) {
-			if (weaponCount >= GOLF_CLUB_PREFERED_SLOT) {
+			if (weaponCount <= GOLF_CLUB_PREFERED_SLOT) {
 				unavailabeSlots.add("golf club");
 			} else {
 				weapons[GOLF_CLUB_PREFERED_SLOT] = "golf club";
@@ -268,10 +277,18 @@ public class WeaponBar extends GameObject {
 		}
 		
 		if (BombMaster.objectives.hasBombNado()) {
-			if (weaponCount >= BOMBNADO_PREFERED_SLOT) {
+			if (weaponCount <= BOMBNADO_PREFERED_SLOT) {
 				unavailabeSlots.add("bombnado");
 			} else {
 				weapons[BOMBNADO_PREFERED_SLOT] = "bombnado";
+			}
+		}
+		
+		if (BombMaster.objectives.hasPegasusBombs()) {
+			if (weaponCount <= PEGASUS_BOMBS_PREFERED_SLOT) {
+				unavailabeSlots.add("pegasus bombs");
+			} else {
+				weapons[PEGASUS_BOMBS_PREFERED_SLOT] = "pegasus bombs";
 			}
 		}
 		
@@ -312,6 +329,13 @@ public class WeaponBar extends GameObject {
 			return false;
 		}
 		return weapons[selectedWeapon].equals("golf club");
+	}
+	
+	public boolean pegasusBombsSelected () {
+		if (weaponCount == 0) {
+			return false;
+		}
+		return weapons[selectedWeapon].equals("pegasus bombs");
 	}
 
 	public class WeaponBox extends GameObject {
@@ -369,6 +393,11 @@ public class WeaponBar extends GameObject {
 			if (item.equals("bombnado")) {
 				this.setSprite(new Sprite ("resources/sprites/config/bombNado.txt"));
 			}
+			if (item.equals("pegasus bombs")) {
+				this.setSprite(new Sprite ("resources/sprites/pegasusBombs.png"));
+			}
+			
+			
 			this.useSpriteHitbox();
 		}
 	}

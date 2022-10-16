@@ -1,0 +1,3 @@
+$src resources/sprites/player top upright pegasus toss.png
+
+ grid 50 46

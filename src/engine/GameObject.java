@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
 
+import gameObjects.Bomb;
 import gameObjects.Fragment;
 import map.Room;
 
@@ -569,10 +570,44 @@ public abstract class GameObject extends GameAPI {
 		return false;
 	}
 	
+	public double getDist (int x, int y) {
+		double xDist = Math.abs(this.getCenterX() - x);
+		double yDist = Math.abs(this.getCenterY() - y);
+		//thanks pathagorus
+		double exactDist = Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist,2));
+		return exactDist;
+	}
+	
 	public void throwObj (double direction, double speed) {
 		this.direction = direction;
 		this.speed = speed;
 	}
+	
+	public void throwObjTowards (int x, int y, double speed) {
+		double ang = Math.atan2(y - (this.getY()), x - (this.getX()));
+		
+		double useAngle = 0;
+		
+		if (ang < -Math.PI/2) {
+			useAngle = ang + -2*(Math.PI - (ang*-1));
+		}
+		
+		if (ang > -Math.PI/2 && ang < 0) {
+			useAngle = ang * -1;
+		}
+		
+		if (ang > 0 && ang < Math.PI/2) {
+			useAngle = ang * -1;
+		}
+		
+		if (ang > Math.PI/2) {
+			useAngle = ang + 2*(Math.PI - (ang));
+		}
+		
+		this.direction = useAngle;
+		this.speed = speed;
+	}
+	
 	public void setThrowDirection(double newDirection) {
 		this.direction = newDirection;
 	}
@@ -769,11 +804,19 @@ public abstract class GameObject extends GameAPI {
 	}
 	
 	public double getCenterX() {
-		return x + hitbox().width/2;
+		if (hitbox() != null) {
+			return x + hitbox().width/2;
+		} else {
+			return x;
+		}
 	}
 	
 	public double getCenterY() {
-		return y + hitbox().height/2;
+		if (hitbox() != null) {
+			return y + hitbox().height/2;
+		} else {
+			return y;
+		}
 	}
 	
 	/**

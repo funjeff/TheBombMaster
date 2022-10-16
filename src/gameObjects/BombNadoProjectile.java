@@ -35,8 +35,10 @@ public class BombNadoProjectile extends GameObject {
 					
 					if (exactDist < AFFECT_RADIUS) {
 						Bomb toAdd = (Bomb) allBombs.get(i);
-						toAdd.setThrowDirection(-1);
-						affectedObjs.add(allBombs.get(i));
+						if (toAdd.isOn()) {
+							toAdd.setThrowDirection(-1);
+							affectedObjs.add(allBombs.get(i));
+						}
 					}
 				}
 			}
