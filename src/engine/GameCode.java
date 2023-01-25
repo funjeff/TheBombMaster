@@ -104,8 +104,8 @@ public class GameCode {
 //		Bat b = new Bat();
 //		b.declare(300,200);
 
-//		CactusDude c = new CactusDude();
-//		c.declare(300,100);
+		CactusDude c = new CactusDude();
+		c.declare(300,100);
 
 //		Bombhog h = new Bombhog();
 //		h.declare(800,200);
@@ -114,8 +114,8 @@ public class GameCode {
 //		h.declare(350,250);
 //		
 		
-		MachineBomber mb = new MachineBomber();
-		mb.declare(400,200);
+//		MachineBomber mb = new MachineBomber();
+//		mb.declare(400,200);
 		
 		//Test
 		//Room2 room2 = new Room2 ();

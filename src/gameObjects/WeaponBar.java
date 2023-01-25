@@ -34,7 +34,7 @@ public class WeaponBar extends GameObject {
 	public WeaponBar () {
 		weaponName.changeBoxVisability();
 		this.setGameLogicPriority(2);
-		updateWeaponsBar();
+		//updateWeaponsBar();
 	}
 	
 	@Override

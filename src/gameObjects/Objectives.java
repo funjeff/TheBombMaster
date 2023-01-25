@@ -15,15 +15,15 @@ public class Objectives {
 	boolean desertHole = false;
 	boolean mountainHole = false;
 	
-	boolean hasGolfClub = true;
+	boolean hasGolfClub = false;
 	
 	//found cactuses and tornados
 	int foundCactuses = 0;
 	int foundTornados = 0;
 	
-	boolean hasBombNado = true;
+	boolean hasBombNado = false;
 	boolean hasCactusBombs = false;
-	boolean hasPegasusBombs = true;
+	boolean hasPegasusBombs = false;
 	
 	boolean hasMasterBombs = true;
 	

@@ -301,7 +301,7 @@ private void doDash () {
 		} else {
 			this.setSprite(SIDE);
 		}
-		this.getAnimationHandler().setFlipHorizontal(false);
+		this.getAnimationHandler().setFlipHorizontal(true);
 		e.declare(this.getX() + 37,this.getY() + 22);
 		break;
 	case 2:
@@ -309,6 +309,7 @@ private void doDash () {
 			this.setSprite(RIGHT_MASTER_BOMBS);
 		} else {
 			this.setSprite(SIDE);
+			this.getAnimationHandler().setFlipHorizontal(false);
 		}
 		e.declare(this.getX() + 2,this.getY() + 19);
 		break;
@@ -1159,7 +1160,7 @@ private void animateMasterBombThrow() {
 			
 			pull = new BombPuller();
 			
-			b.throwObj(Math.PI/2,40);
+			b.throwObj(Math.PI/2,30);
 			throwingBomb = false;
 		}
 	}
@@ -1182,7 +1183,7 @@ private void animateMasterBombThrow() {
 			
 			pull = new BombPuller();
 			
-			b.throwObj(3*Math.PI/2,40);
+			b.throwObj(3*Math.PI/2,30);
 			throwingBomb = false;
 		}
 	}
@@ -1206,7 +1207,7 @@ private void animateMasterBombThrow() {
 			
 			pull = new BombPuller();
 			
-			b.throwObj(Math.PI,40);
+			b.throwObj(Math.PI,30);
 			throwingBomb = false;
 		}
 	}
@@ -1229,7 +1230,7 @@ private void animateMasterBombThrow() {
 			
 			pull = new BombPuller();
 			
-			b.throwObj(0,40);
+			b.throwObj(0,30);
 			throwingBomb = false;
 		}
 	}
@@ -1259,7 +1260,7 @@ private void animateMasterBombThrow() {
 			
 			pull = new BombPuller();
 			
-			b.throwObj(5*Math.PI/4,40);
+			b.throwObj(5*Math.PI/4,30);
 			throwingBomb = false;
 		}
 	}
@@ -1289,7 +1290,7 @@ private void animateMasterBombThrow() {
 			
 			pull = new BombPuller();
 			
-			b.throwObj(7*Math.PI/4,40);
+			b.throwObj(7*Math.PI/4,30);
 			throwingBomb = false;
 		}
 	}
@@ -1320,7 +1321,7 @@ private void animateMasterBombThrow() {
 			
 			pull = new BombPuller();
 			
-			b.throwObj(Math.PI/4,40);
+			b.throwObj(Math.PI/4,30);
 			throwingBomb = false;
 		}
 	}
@@ -1350,7 +1351,7 @@ private void animateMasterBombThrow() {
 			
 			pull = new BombPuller();
 			
-			b.throwObj(3 *Math.PI/4,40);
+			b.throwObj(3 *Math.PI/4,30);
 			throwingBomb = false;
 		}
 	}
@@ -1552,21 +1553,21 @@ private void handleDash () {
 		
 		public void setBomb(Bomb newPull) {
 			toPull = newPull;
-			toPull.throwObjTowards((int)this.getX(),(int)this.getY(), 35);
+			toPull.throwObjTowards((int)this.getX(),(int)this.getY(), 25);
 		}
 		
 		@Override
 		public void setX (double val) {
 			super.setX(val);
-			toPull.throwObjTowards((int)this.getX(),(int)this.getY(), 35);
+			toPull.throwObjTowards((int)this.getX(),(int)this.getY(), 25);
 		}
 		
 		@Override
 		public void setY (double val) {
 			super.setY(val);
-			toPull.throwObjTowards((int)this.getX(),(int)this.getY(), 35);
+			toPull.throwObjTowards((int)this.getX(),(int)this.getY(), 25);
 			
-			if (this.getDist((int)toPull.getCenterX(), (int)toPull.getCenterY()) < 36) {
+			if (this.getDist((int)toPull.getCenterX(), (int)toPull.getCenterY()) < 26) {
 				toPull.setCenterX(this.getX());
 				toPull.setCenterY(this.getY());
 				isDone = true;
@@ -1640,40 +1641,40 @@ private void handleDash () {
 			
 			if (mast.getSprite().equals(RIGHT_MASTER_BOMBS)) {
 				mast.setY(this.getY() + this.getSprite().getHeight() - mast.getSprite().getHeight() - (curDist * RIGHT_SHAD_MAX_Y_DIST));
-				mast.setX(this.getX() - 14);
+				mast.setX(this.getX() - 22);
 				
 			}
 			
 			if (mast.getSprite().equals(LEFT_MASTER_BOMBS)) {
 				mast.setY(this.getY() + this.getSprite().getHeight()- mast.getSprite().getHeight() - (curDist * LEFT_SHAD_MAX_Y_DIST));
-				mast.setX(this.getX() - 8);
+				mast.setX(this.getX() - 12);
 			}
 			
 			if (mast.getSprite().equals(FORWARD_MASTER_BOMBS)) {
 				mast.setY(this.getY() + this.getSprite().getHeight()- mast.getSprite().getHeight() - (curDist * FORWARD_SHAD_MAX_Y_DIST));
-				mast.setX(this.getX() - 12);
+				mast.setX(this.getX() - 17);
 			}
 			
 			if (mast.getSprite().equals(BACK_MASTER_BOMBS)) {
 				mast.setY(this.getY() + this.getSprite().getHeight()- mast.getSprite().getHeight() - (curDist * BACK_SHAD_MAX_Y_DIST));
-				mast.setX(this.getX() - 13);
+				mast.setX(this.getX() - 17);
 			}
 			if (mast.getSprite().equals(DIAGONAL_FORWARD_MASTER_BOMBS) && mast.getAnimationHandler().flipHorizontal()) {
 				mast.setY(this.getY() + this.getSprite().getHeight()/2 - mast.getSprite().getHeight() - (curDist * DOWNRIGHT_SHAD_MAX_Y_DIST));
-				mast.setX(this.getX() - ((curDist * DOWNRIGHT_SHAD_MAX_X_DIST) +30));
+				mast.setX(this.getX() - ((curDist * DOWNRIGHT_SHAD_MAX_X_DIST) +40));
 			}
 			if (mast.getSprite().equals(DIAGONAL_FORWARD_MASTER_BOMBS) && !mast.getAnimationHandler().flipHorizontal()) {
 				mast.setY(this.getY() + this.getSprite().getHeight()/2 - mast.getSprite().getHeight() - ((curDist * DOWNLEFT_SHAD_MAX_Y_DIST) ));
-				mast.setX(this.getX() + ((curDist * DOWNLEFT_SHAD_MAX_X_DIST) - 2));
+				mast.setX(this.getX() + ((curDist * DOWNLEFT_SHAD_MAX_X_DIST) - 8));
 			}
 			
 			if (mast.getSprite().equals(DIAGONAL_BACK_MASTER_BOMBS) && mast.getAnimationHandler().flipHorizontal()) {
-				mast.setY(this.getY() - mast.getSprite().getHeight() + ((curDist * UPLEFT_SHAD_MAX_Y_DIST) + 12));
-				mast.setX(this.getX() - ((curDist * UPLEFT_SHAD_MAX_X_DIST) + 22));
+				mast.setY(this.getY() - mast.getSprite().getHeight() + ((curDist * UPLEFT_SHAD_MAX_Y_DIST) + 18));
+				mast.setX(this.getX() - ((curDist * UPLEFT_SHAD_MAX_X_DIST) + 33));
 			}
 			if (mast.getSprite().equals(DIAGONAL_BACK_MASTER_BOMBS) && !mast.getAnimationHandler().flipHorizontal()) {
-				mast.setY(this.getY() - mast.getSprite().getHeight() + ((curDist * UPRIGHT_SHAD_MAX_Y_DIST) + 12));
-				mast.setX(this.getX() + ((curDist * UPRIGHT_SHAD_MAX_X_DIST) + 5));
+				mast.setY(this.getY() - mast.getSprite().getHeight() + ((curDist * UPRIGHT_SHAD_MAX_Y_DIST) + 18));
+				mast.setX(this.getX() + ((curDist * UPRIGHT_SHAD_MAX_X_DIST)) + 5 );
 			}
 			
 			prevDisplaceX = mast.getX() - prevX;
