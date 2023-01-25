@@ -346,36 +346,32 @@ public class Room {
 	public static boolean isCollidingWithTile (Rectangle obj, int tileX, int tileY) {
 		
 		//Get the tile icon
-		BufferedImage sampleImg = tileIcons.get (getTile (collisionLayer, tileY, tileX));
+		BufferedImage sampleImg = tileIcons.get (getTile (collisionLayer, tileX, tileY));
 		WritableRaster imgRaster = sampleImg.getAlphaRaster ();
 		
 		//Calculate the intersection
 		Rectangle tileRect = new Rectangle (tileX * tileWidth, tileY * tileHeight, tileWidth, tileHeight);
 		Rectangle isectRect = obj.intersection (tileRect);
-		System.out.println (obj.toString ());
-		System.out.println (tileRect.toString ());
-		System.out.println (isectRect.toString ());
 		int spriteX = isectRect.x % tileWidth;
 		int spriteY = isectRect.y % tileHeight;
+		//System.out.println ("TO CHECK: " + spriteX + ", " + spriteY);
 		
-//		//Randomly check 1% of the pixels in the tile
-//		int numPixelsToCheck = (isectRect.width * isectRect.height) / 100;
-//		for (int i = 0; i < numPixelsToCheck; i++) {
-//			int randX = (int)(Math.random () * isectRect.width);
-//			int randY = (int)(Math.random () * isectRect.height);
-//			int currX = randX + spriteX;
-//			int currY = randY + spriteY;
-//			//Sample here
-//			double[] sample = new double[1];
-//			imgRaster.getPixel (currX, currY, sample);
-//			if (sample[0] > 0) {
-//				return true;
-//			}
-//		}
+		//Randomly check 1% of the pixels in the tile
+		int numPixelsToCheck = (isectRect.width * isectRect.height) / 100;
+		for (int i = 0; i < numPixelsToCheck; i++) {
+			int randX = (int)(Math.random () * isectRect.width);
+			int randY = (int)(Math.random () * isectRect.height);
+			int currX = randX + spriteX;
+			int currY = randY + spriteY;
+			//Sample here
+			double[] sample = new double[1];
+			imgRaster.getPixel (currX, currY, sample);
+			if (sample[0] > 0) {
+				return true;
+			}
+		}
 			
 		//Check every pixel in the intersection
-		System.out.println ("INSIDE: " + getTile (collisionLayer, tileY, tileX));
-		System.out.println (getTile (collisionLayer, tileY, tileX));
 		for (int wx = 0; wx < isectRect.width; wx++) {
 			for (int wy = 0; wy < isectRect.height; wy++) {
 				int currX = wx + spriteX;
@@ -421,7 +417,6 @@ public class Room {
 						} else if (dataList.get(index).isSolid() && isCollidingWithTile (obj.hitbox (), wx, wy)) {
 							foundCollision = true;
 						}
-						System.out.println ("OUTSIDE: " + index);
 				} else {
 					try {
 					for (int b = 0; b < mapObjects.get(toPackedLong(wx,wy)).size(); b++ ) {
@@ -811,7 +806,6 @@ public class Room {
 			
 			//Load the sprite and get its BufferedImage
 			File f = new File (tileset.getString ("image"));
-			System.out.println (f.getName ());
 			String tileId = f.getName ().split ("\\.")[0];
 			Sprite tilesImg = new Sprite ("resources/mapdata/" + f.getName ());
 			BufferedImage rawImg = tilesImg.getFrame (0);
@@ -1159,7 +1153,6 @@ public class Room {
 		public MapLayer newMapLayer () {
 			
 			String layerType = layer.getString ("type");
-			System.out.println (layerType);
 			
 			switch (layerType) {
 				case "tilelayer":
@@ -1484,7 +1477,7 @@ public class Room {
 						renderedImages.set(l,new BufferedImage (chungusWidth*tileHeight,chungusWidth*tileHeight,BufferedImage.TYPE_4BYTE_ABGR));
 						Graphics g = renderedImages.get(l).getGraphics();
 						while (layerClassfications.get(currentLayer)>=l) {
-							if (layerData.get (currentLayer) instanceof TileLayer /*&& !((TileLayer)layerData.get (currentLayer)).isCollisionLayer ()*/) {
+							if (layerData.get (currentLayer) instanceof TileLayer && !((TileLayer)layerData.get (currentLayer)).isCollisionLayer ()) {
 							for (int wx = 0; wx < width; wx++) {
 								for (int wy = 0; wy < height; wy++) {
 									if (getTile (currentLayer, wx + x, wy + y) == SPECIAL_TILE_ID){

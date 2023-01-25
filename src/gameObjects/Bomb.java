@@ -5,6 +5,7 @@ import java.util.Random;
 
 import engine.GameObject;
 import engine.Sprite;
+import map.Room;
 
 public class Bomb extends GameObject {
 
@@ -17,15 +18,12 @@ public class Bomb extends GameObject {
 	public Sprite halfFuseRed = new Sprite ("resources/sprites/bombs/bomb half fuse red.png");
 	public Sprite noFuseRed = new Sprite ("resources/sprites/bombs/bomb no fuse red.png");
 	
-	
 	int fuseThird;
 	
 	int bombTimer = 40;
 	int fullTimer = 40;
 	
 	int tempImunity = 0;
-	
-	
 	
 	ArrayList <GameObject> owners = new ArrayList <GameObject>();
 	
@@ -74,7 +72,7 @@ public class Bomb extends GameObject {
 			fuseThird = 2;
 		}
 		
-		if (bombTimer == 0 || (this.isCollidingChildren("GameObject") && !owners.contains(this.getCollisionInfo().getCollidingObjects().get(0)) && tempImunity == 0)) {
+		if (bombTimer == 0 || (Room.isColliding (this) || this.isCollidingChildren("GameObject") && !owners.contains(this.getCollisionInfo().getCollidingObjects().get(0)) && tempImunity == 0)) {
 		
 //			System.out.println(this.getCollisionInfo().getCollidingObjects().get(0));
 //			System.out.println(owners);

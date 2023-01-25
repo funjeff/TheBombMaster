@@ -1,0 +1,14 @@
+{ "columns":10,
+ "image":"fortune hut_big.png",
+ "imageheight":512,
+ "imagewidth":320,
+ "margin":0,
+ "name":"fortune hut_big",
+ "spacing":0,
+ "tilecount":160,
+ "tiledversion":"1.8.5",
+ "tileheight":32,
+ "tilewidth":32,
+ "type":"tileset",
+ "version":"1.8"
+}

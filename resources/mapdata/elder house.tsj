@@ -1,0 +1,14 @@
+{ "columns":7,
+ "image":"elder house.png",
+ "imageheight":225,
+ "imagewidth":237,
+ "margin":0,
+ "name":"elder house",
+ "spacing":0,
+ "tilecount":49,
+ "tiledversion":"1.8.5",
+ "tileheight":32,
+ "tilewidth":32,
+ "type":"tileset",
+ "version":"1.8"
+}

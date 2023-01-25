@@ -43,7 +43,7 @@ public class GameCode {
 		Room.loadRoom ("resources/mapdata/master_bomber_worldmap.tmj");
 		
 		mast = new BombMaster ();
-		mast.declare();
+		mast.declare(2436.0, 6736.0);
 		
 
 		Hud hud = new Hud();
@@ -60,8 +60,8 @@ public class GameCode {
 //		CactusDude c = new CactusDude();
 //		c.declare(300,100);
 
-		Bombhog h = new Bombhog();
-		h.declare(200,200);
+		//Bombhog h = new Bombhog();
+		//h.declare(200,200);
 		
 //		Heart h = new Heart ();
 //		h.declare(350,250);

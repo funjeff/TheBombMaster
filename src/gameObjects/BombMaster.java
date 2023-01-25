@@ -99,7 +99,7 @@ public class BombMaster extends GameObject {
 	
 	@Override
 	public void draw() {
-		
+		System.out.println (getX () + ", " + getY ());
 		
 		if (this.getSprite().equals(SIDE) && this.getAnimationHandler().flipHorizontal()) {
 			myLegs.setY(this.getY() + this.getSprite().getHeight() - 5);
