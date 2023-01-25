@@ -3,13 +3,25 @@ package engine;
 import java.util.ArrayList;
 
 import gameObjects.Bat;
+import gameObjects.BombGolfCounter;
+import gameObjects.BombGolfer;
 import gameObjects.BombMaster;
 import gameObjects.Bombhog;
+import gameObjects.Bombmire;
+import gameObjects.Cactus;
 import gameObjects.CactusDude;
+import gameObjects.CactusFarmer;
+import gameObjects.DesertHole;
+import gameObjects.GolfBall;
+import gameObjects.GolfHole;
+import gameObjects.WhatsUpDude;
 import gameObjects.Heart;
 import gameObjects.Hud;
 import gameObjects.MachineBomber;
+import gameObjects.Tornado;
+import gameObjects.TornadoFarmer;
 import map.Room;
+import java.awt.event.KeyEvent;
 
 
 
@@ -22,7 +34,7 @@ public class GameCode {
 
 	static ArrayList <Asker> askers = new ArrayList <Asker> ();
 	
-//	static Textbox t = new Textbox ("~S8~~P100~TESTY BOIIIIIIIIIIIIIS");
+
 
 	public static void testBitch () {
 		
@@ -49,20 +61,52 @@ public class GameCode {
 		Hud hud = new Hud();
 		hud.declare();
 		
-		//t.setBox("Automobiles");
-      //  t.pushString("EPIC STRING DUDE");
-      //  t.pushString("~QCHOICE 1:CHOICE 2");
-      //  t.declare(200, 200);
+//		
+//		GolfBall b = new GolfBall ();
+//		b.declare(300, 200);
+//		
+//		DesertHole h = new DesertHole ();
+//		h.declare(400, 200);
 		
-	//	Bat b = new Bat();
-	//	b.declare(300,200);
-
-//		CactusDude c = new CactusDude();
-//		c.declare(300,100);
-
-		//Bombhog h = new Bombhog();
-		//h.declare(200,200);
+//		BombGolfCounter bc = new BombGolfCounter ();
+//		bc.declare(100, 200);
 		
+		
+//		e.declare (200,100);
+//		e1.declare(260, 100);
+//		
+//		Tornado t = new Tornado();
+//		
+//		t.declare(400, 200);
+//        
+//		Tornado t2 = new Tornado();
+//		
+//		t2.declare(400, 300);
+//        
+//		Tornado t3 = new Tornado();
+//		
+//		t3.declare(400, 400);
+//        
+//		
+//		Cactus c1 = new Cactus();
+//		
+//		c1.declare(100, 200);
+//        
+//		Cactus c2 = new Cactus();
+//		
+//		c2.declare(100, 300);
+//		
+//		Cactus c3 = new Cactus();
+//		
+//		c3.declare(100, 400);
+//		
+		
+//		Bat b = new Bat();
+//		b.declare(300,200);
+
+		CactusDude c = new CactusDude();
+		c.declare(300,100);
+
 //		Heart h = new Heart ();
 //		h.declare(350,250);
 //		
@@ -127,6 +171,7 @@ public class GameCode {
 				
 				asking.getKeys().add(keyCode);
 			}
+			
 			
 			return returnValue;
 		  }

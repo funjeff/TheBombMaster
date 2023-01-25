@@ -24,6 +24,8 @@ public class Bomb extends GameObject {
 	int fullTimer = 40;
 	
 	int tempImunity = 0;
+
+	boolean spawnedOnExplosion = false;
 	
 	ArrayList <GameObject> owners = new ArrayList <GameObject>();
 	
@@ -31,6 +33,26 @@ public class Bomb extends GameObject {
 	
 	int minFrags = 3;
 	int maxFrags = 10;
+	
+	String explsionSprite = "default";
+	
+	String fragmentString = "bomb fragment";
+	
+	boolean asteticOnly = false;
+	
+	boolean cancelExplosion = false;
+	
+	boolean cactusEffect = false;
+	
+	boolean on = true;
+	
+	boolean isMasterBomb = false;
+	
+	double curHue = 0.0;
+	
+	boolean redFlash = true;
+	
+	public static final int AFTERIMAGE_COUNT = 3;
 	
 	public Bomb (GameObject owner) {
 		this.setSprite(fullFuse);
@@ -56,57 +78,113 @@ public class Bomb extends GameObject {
 		bombSize = explosionSize;
 	}
 	
+	
 	@Override
 	public void frameEvent() {
-		bombTimer = bombTimer - 1;
 		
-		if (tempImunity != 0) {
-			tempImunity = tempImunity -1;
-		}
-		
-		if (bombTimer == fullTimer * 2/3) {
-			fuseThird = 1;
-		}
-		
-		if (bombTimer == fullTimer * 1/3) {
-			fuseThird = 2;
-		}
-		
-		if (bombTimer == 0 || (Room.isColliding (this) || this.isCollidingChildren("GameObject") && !owners.contains(this.getCollisionInfo().getCollidingObjects().get(0)) && tempImunity == 0)) {
-		
-//			System.out.println(this.getCollisionInfo().getCollidingObjects().get(0));
-//			System.out.println(owners);
+		if (isMasterBomb) {
+
+			AfterImage curLocation = new AfterImage();
 			
-			Explosion boom = new Explosion(bombSize);
-			boom.declare(this.getX() + this.hitbox().width/2 - boom.getSprite().getWidth()/2,this.getY() + this.hitbox().height/2 - boom.getSprite().getHeight()/2);
+			curLocation.setSprite(new Sprite (this.getSprite()));	
+			
+			curLocation.declare(this.getX(), this.getY());
+			
+			this.setSprite(new Sprite (fullFuseRed));
+			
+			curHue = curHue + 0.03;
+			
+			Sprite.tweekHue(getSprite(),curHue);
+				
+		}
+		
+		if (spawnedOnExplosion && !this.isColliding("Explosion")) {
+			spawnedOnExplosion = false;
+		}
+		
+		/*if (bombTimer == 0 || (Room.isColliding (this) || this.isCollidingChildren("GameObject") && !owners.contains(this.getCollisionInfo().getCollidingObjects().get(0)) && tempImunity == 0)) {*/
+		
+		if (on) {
+			bombTimer = bombTimer - 1;
+			
+			if (tempImunity != 0) {
+				tempImunity = tempImunity -1;
+			}
+			
+			if (bombTimer == fullTimer * 2/3) {
+				fuseThird = 1;
+			}
+			
+			if (bombTimer == fullTimer * 1/3) {
+				fuseThird = 2;
+			}
+			
+			if (redFlash) {
+				if (fuseThird == 0) {
+					if (bombTimer % 5 == 0) {
+						this.setSprite(fullFuseRed);
+					} else {
+						this.setSprite(fullFuse);
+					}
+				}
+				
+				if (fuseThird == 1) {
+					if (bombTimer % 3 == 0) {
+						this.setSprite(halfFuseRed);
+					} else {
+						this.setSprite(halfFuse);
+					}
+				}
+				
+				if (fuseThird == 2) {
+					if (bombTimer % 2 == 0) {
+						this.setSprite(noFuseRed);
+					} else {
+						this.setSprite(noFuse);
+					}
+				}
+			}
 			
 			
-			breakToFragments("bomb fragment",minFrags,maxFrags);
-			this.forget();
-		}
-		
-		if (fuseThird == 0) {
-			if (bombTimer % 5 == 0) {
-				this.setSprite(fullFuseRed);
-			} else {
-				this.setSprite(fullFuse);
+			if (bombTimer == 0 || (!asteticOnly && this.isCollidingChildren("GameObject") && !owners.contains(this.getCollisionInfo().getCollidingObjects().get(0)) && tempImunity == 0)) {
+			
+				if (bombTimer != 0) {
+					if (this.getCollisionInfo().getCollidingObjects().get(0) instanceof Explosion || this.getCollisionInfo().getCollidingObjects().get(0) instanceof NPC) {
+						super.frameEvent();
+						return;
+					}
+				}
+	//			System.out.println(this.getCollisionInfo().getCollidingObjects().get(0));
+	//			System.out.println(owners);
+				
+				Explosion boom = new Explosion(bombSize);
+				
+				if (isMasterBomb) {
+					boom.makeRainbow();
+				}
+				
+				if (!cancelExplosion) {
+					boom.declare(this.getX() + this.hitbox().width/2 - boom.getSprite().getWidth()/2,this.getY() + this.hitbox().height/2 - boom.getSprite().getHeight()/2);
+				}
+				
+				if (!this.explsionSprite.equals("default")) {
+					boom.setSprite(new Sprite (this.explsionSprite));
+				}
+				
+				if (asteticOnly) {
+					boom.makeAsteticOnly();
+				}
+				boom.setRenderPriority(this.getRenderPriority());
+				breakToFragments(fragmentString,minFrags,maxFrags);
+				
+				if (this.cactusEffect) {
+					this.shootCactusBombs(boom);
+				}
+				
+				this.forget();
 			}
-		}
-		
-		if (fuseThird == 1) {
-			if (bombTimer % 3 == 0) {
-				this.setSprite(halfFuseRed);
-			} else {
-				this.setSprite(halfFuse);
-			}
-		}
-		
-		if (fuseThird == 2) {
-			if (bombTimer % 2 == 0) {
-				this.setSprite(noFuseRed);
-			} else {
-				this.setSprite(noFuse);
-			}
+			
+			
 		}
 	
 		super.frameEvent();
@@ -131,22 +209,65 @@ public class Bomb extends GameObject {
 		
 	}
 	
+	
+	public void doCactusEffect () {
+		cactusEffect = true;
+	}
 	public void setFrags (int minFrags, int maxFrags) {
 		this.minFrags = minFrags;
 		this.maxFrags = maxFrags;
 	}
 	
+	public void setFragsType (String fragType) {
+		this.fragmentString = fragType;
+	}
+	
+	public void dontFlash () {
+		redFlash = false;
+	}
 	
 	@Override
 	public void gettingSploded() {
-		if (tempImunity == 0) {
-			Explosion boom = new Explosion(bombSize);
-			boom.declare(this.getX(),this.getY());
+		if (fullTimer - bombTimer <= 5) {
+			spawnedOnExplosion = true;
+		}
 		
+		if (tempImunity == 0 && !this.asteticOnly && !spawnedOnExplosion) {
+			Explosion boom = new Explosion(bombSize);
+			if (!cancelExplosion) {
+				boom.declare(this.getX() + this.hitbox().width/2 - boom.getSprite().getWidth()/2,this.getY() + this.hitbox().height/2 - boom.getSprite().getHeight()/2);
+			}
 			
-			breakToFragments("bomb fragment",minFrags,maxFrags);
+			if (!this.explsionSprite.equals("default")) {
+				boom.setSprite(new Sprite (this.explsionSprite));
+			}
+			
+			
+			boom.setRenderPriority(this.getRenderPriority());
+			breakToFragments(fragmentString,minFrags,maxFrags);
+			
+			
 			this.forget();
 		}
+	}
+	
+	public void cancelExplosion() {
+		cancelExplosion = true;
+	}
+	
+	public void makeAsteticOnly () {
+		asteticOnly = true;
+	}
+	
+	public void makeMasterBomb() {
+		isMasterBomb = true;
+		Random rand = new Random ();
+		curHue = rand.nextDouble();
+		this.setSprite(fullFuseRed);
+	}
+	
+	public void setExplosionSprite (String explosionSprite) {
+		this.explsionSprite = explosionSprite;
 	}
 	
 	public void giveTemparayImunity(int time) {
@@ -156,6 +277,190 @@ public class Bomb extends GameObject {
 	public void setTime (int bombTime) {
 		this.bombTimer = bombTime;
 		this.fullTimer = bombTime;
+	}
+	
+	public void reset () {
+		this.bombTimer = fullTimer;
+		fuseThird = 0;
+	}
+	
+	
+	public void turnOff () {
+		on = false;
+	}
+	
+	public void turnOn () {
+		on = true;
+	}
+	
+	public boolean isOn () {
+		return on;
+	}
+	
+	public ArrayList <GameObject> getOwners (){
+		return owners;
+	}
+	
+	private void shootCactusBombs(Explosion beWary) {
+		//TODO shoot bombs
+		
+		Bomb b1 = new Bomb(this,1);
+		Bomb b2 = new Bomb(this,1);
+		Bomb b3 = new Bomb(this,1);
+		Bomb b4 = new Bomb(this,1);
+		Bomb b5 = new Bomb(this,1);
+		Bomb b6 = new Bomb(this,1);
+		Bomb b7 = new Bomb(this,1);
+		Bomb b8 = new Bomb(this,1);
+	
+		ArrayList <GameObject> owners = new ArrayList <GameObject>();
+		
+		owners.add(this);
+		owners.add(beWary);
+		
+		owners.add(b1);
+		owners.add(b2);
+		owners.add(b3);
+		owners.add(b4);
+		owners.add(b5);
+		owners.add(b6);
+		owners.add(b7);
+		owners.add(b8);
+		
+		
+		b1.setOwners(owners);
+		b2.setOwners(owners);
+		b3.setOwners(owners);
+		b4.setOwners(owners);
+		b5.setOwners(owners);
+		b6.setOwners(owners);
+		b7.setOwners(owners);
+		b8.setOwners(owners);
+		
+		b1.setBombSprites("cactus needle");
+		b2.setBombSprites("cactus needle");
+		b3.setBombSprites("cactus needle");
+		b4.setBombSprites("cactus needle");
+		b5.setBombSprites("cactus needle");
+		b6.setBombSprites("cactus needle");
+		b7.setBombSprites("cactus needle");
+		b8.setBombSprites("cactus needle");
+		
+		b1.setFragsType("cactus bomb fragment");
+		b2.setFragsType("cactus bomb fragment");
+		b3.setFragsType("cactus bomb fragment");
+		b4.setFragsType("cactus bomb fragment");
+		b5.setFragsType("cactus bomb fragment");
+		b6.setFragsType("cactus bomb fragment");
+		b7.setFragsType("cactus bomb fragment");
+		b8.setFragsType("cactus bomb fragment");
+		
+		
+		int minFrags = 1;
+		int maxFrags = 2;
+		
+		b1.setFrags(minFrags,maxFrags);
+		b2.setFrags(minFrags,maxFrags);
+		b3.setFrags(minFrags,maxFrags);
+		b4.setFrags(minFrags,maxFrags);
+		b5.setFrags(minFrags,maxFrags);
+		b6.setFrags(minFrags,maxFrags);
+		b7.setFrags(minFrags,maxFrags);
+		b8.setFrags(minFrags,maxFrags);
+		
+		double bx = this.getX() + this.getHitboxXOffset() + this.hitbox().width/2;
+		double by = this.getY() + this.getHitboxYOffset() + this.hitbox().height/2;
+		
+		
+		b1.declare(bx,by);
+		b2.declare(bx,by);
+		b3.declare(bx,by);
+		b4.declare(bx,by);
+		b5.declare(bx,by);
+		b6.declare(bx,by);
+		b7.declare(bx,by);
+		b8.declare(bx,by);
+		
+		int bombTime = 10;
+		
+		b1.setTime(bombTime);
+		b2.setTime(bombTime);
+		b3.setTime(bombTime);
+		b4.setTime(bombTime);
+		b5.setTime(bombTime);
+		b6.setTime(bombTime);
+		b7.setTime(bombTime);
+		b8.setTime(bombTime);
+		
+		
+		int bombSpeed = 7; //im probably gonna wanna tweek this without having to change every throw
+		
+		b1.throwObj(0,bombSpeed);
+		b1.setDrawRotation(1.4);
+		
+		b2.throwObj(Math.PI/4,bombSpeed);
+		b2.setDrawRotation(.7);
+		
+		b3.throwObj(Math.PI/2,bombSpeed);
+		
+		b4.throwObj(3*Math.PI/4,bombSpeed);
+		b4.setDrawRotation(-.7);
+		
+		b5.throwObj(Math.PI,bombSpeed);
+		b5.setDrawRotation(-1.4);
+		
+		b6.throwObj(5*Math.PI/4,bombSpeed);
+		b6.setDrawRotation(-2.1);
+		
+		b7.throwObj(3*Math.PI/2,bombSpeed);
+		b7.setDrawRotation(-2.8);
+		
+		b8.throwObj(7*Math.PI/4,bombSpeed);
+		b8.setDrawRotation(-3.5);
+		
+		
+		
+	}
+	
+	public class AfterImage extends GameObject {
+		int stepCount = 0;
+		
+
+		
+		public AfterImage () {
+			this.useSpriteHitbox();
+			this.disableCollisions();
+		}
+		
+		@Override
+		public void frameEvent () {
+			
+			
+		
+			stepCount = stepCount + 1;
+			
+			if (stepCount == AFTERIMAGE_COUNT) {
+				Explosion e = new Explosion ();
+				
+				e.makeRainbow();
+				
+				e.makeAsteticOnly();
+				e.declare();
+				e.setCenterX(this.getCenterX());
+				e.setCenterY(this.getCenterY());
+				
+				this.forget();
+			}
+			
+		}
+		
+	@Override
+	public void draw () {
+		// 2 is here to make the first one not entirly visable it basically makes the effect a lot more noticeable
+		//becasue its kinda hard to see with all the colors and everything
+		this.getSprite().setOpacity((float) ((1.0/AFTERIMAGE_COUNT) * (AFTERIMAGE_COUNT - stepCount))/2);
+		super.draw();
+	}
 	}
 	
 }

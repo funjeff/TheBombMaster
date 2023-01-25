@@ -1,0 +1,3 @@
+$src resources/sprites/player back pegasus toss.png
+
+ grid 23 40

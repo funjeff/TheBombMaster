@@ -427,7 +427,7 @@ public class Room {
 							return true;
 						}
 					}
-					System.out.println ("OUTSIDE: " + index);
+					//System.out.println ("OUTSIDE: " + index);
 					if (dataList.get(index).isSolid() && isCollidingWithTile (obj.hitbox (), wx, wy)) {
 						foundCollision = true;
 					}

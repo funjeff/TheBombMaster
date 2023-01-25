@@ -1,0 +1,3 @@
+$src resources/sprites/bomb golf.png
+
+ grid 157 100

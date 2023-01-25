@@ -12,6 +12,8 @@ public class Hud extends GameObject {
 	
 	ArrayList <Heart> hearts = new ArrayList <Heart>();
 	
+	static WeaponBar bar = new WeaponBar();
+	
 	public Hud() {
 		
 		Heart heart1 = new Heart();
@@ -36,7 +38,7 @@ public class Hud extends GameObject {
 		
 		this.setRenderPriority(-100);
 		
-		
+		bar.declare(200, 0);
 		
 	}
 	

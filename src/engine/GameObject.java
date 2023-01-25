@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
 
+import gameObjects.Bomb;
 import gameObjects.Fragment;
 import map.Room;
 
@@ -143,14 +144,16 @@ public abstract class GameObject extends GameAPI {
 	
 	double prevAngle;
 	
-	double direction = -1;
-	double speed = 0;
+	public double direction = -1;
+	public double speed = 0;
 	
 	protected Point iris;
 	
 	private Point focusPoint = null;
 	
 	private int lookingMode = 1;
+	
+	boolean collsionsEnabled = true;
 	
 	/**
 	 * Container and utility class for GameObject variants
@@ -431,6 +434,15 @@ public abstract class GameObject extends GameAPI {
 	protected void disablePixelCollisions () {
 		pixelCollisions = false;
 	}
+	
+	public void disableCollisions () {
+		collsionsEnabled = false;
+	}
+	
+	public void enableCollisions () {
+		collsionsEnabled = true;
+	}
+	
 	/**
 	 * Draws this GameObject at its x and y coordinates relative to the screen.
 	 */
@@ -484,6 +496,7 @@ public abstract class GameObject extends GameAPI {
 		
 		for (int i = 0; i < fragNum; i++) {
 			Fragment frag = new Fragment(fragName);
+			frag.setRenderPriority(this.getRenderPriority());
 			frag.throwObj( r.nextDouble()*2*Math.PI, r.nextInt(maxSpeed - minSpeed) + minSpeed);
 			frag.declare(this.getX() + fragOffsetX,this.getY() + fragOffsetY);
 		}
@@ -557,9 +570,49 @@ public abstract class GameObject extends GameAPI {
 		return false;
 	}
 	
+	public double getDist (int x, int y) {
+		double xDist = Math.abs(this.getCenterX() - x);
+		double yDist = Math.abs(this.getCenterY() - y);
+		//thanks pathagorus
+		double exactDist = Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist,2));
+		return exactDist;
+	}
+	
 	public void throwObj (double direction, double speed) {
 		this.direction = direction;
 		this.speed = speed;
+	}
+	
+	public void throwObjTowards (int x, int y, double speed) {
+		double ang = Math.atan2(y - (this.getY()), x - (this.getX()));
+		
+		double useAngle = 0;
+		
+		if (ang < -Math.PI/2) {
+			useAngle = ang + -2*(Math.PI - (ang*-1));
+		}
+		
+		if (ang > -Math.PI/2 && ang < 0) {
+			useAngle = ang * -1;
+		}
+		
+		if (ang > 0 && ang < Math.PI/2) {
+			useAngle = ang * -1;
+		}
+		
+		if (ang > Math.PI/2) {
+			useAngle = ang + 2*(Math.PI - (ang));
+		}
+		
+		this.direction = useAngle;
+		this.speed = speed;
+	}
+	
+	public void setThrowDirection(double newDirection) {
+		this.direction = newDirection;
+	}
+	public double getThrowDirection () {
+		return direction;
 	}
 	/**
 	 * uses the rotate method in animation handler to rotate the sprite also adjusts the hitbox to match (kinda)
@@ -638,6 +691,11 @@ public abstract class GameObject extends GameAPI {
 	 * @return True if the objects collide; false otherwise
 	 */
 	public boolean isColliding (GameObject obj) {
+		
+		if (!this.collsionsEnabled || !obj.collsionsEnabled) {
+			return false;
+		}
+		
 		if (obj == null) {
 			return false;
 		}
@@ -673,6 +731,11 @@ public abstract class GameObject extends GameAPI {
 		return false;
 	}
 	public boolean isColliding (Rectangle hitbox) {
+		
+		if (!this.collsionsEnabled) {
+			return false;
+		}
+		
 		Rectangle[] thisHitbox = hitboxes ();
 		Rectangle objHitbox = hitbox;
 		if (thisHitbox.length == 0 || objHitbox == null) {
@@ -695,6 +758,10 @@ public abstract class GameObject extends GameAPI {
 	 * @return True if a collision was detected; false otherwise
 	 */
 	public boolean isColliding (String objectType) {
+		if (!this.collsionsEnabled) {
+			return false;
+		}
+		
 		lastCollision = ObjectHandler.checkCollision (objectType, this);
 		return lastCollision.collisionOccured ();
 	}
@@ -705,6 +772,9 @@ public abstract class GameObject extends GameAPI {
 	 * @return True if a collision was detected; false otherwise
 	 */
 	public boolean isCollidingChildren (String parentType) {
+		if (!this.collsionsEnabled) {
+			return false;
+		}
 		lastCollision = ObjectHandler.checkCollisionChildren (parentType, this);
 		return lastCollision.collisionOccured ();
 	}
@@ -731,6 +801,22 @@ public abstract class GameObject extends GameAPI {
 	 */
 	public double getY () {
 		return y;
+	}
+	
+	public double getCenterX() {
+		if (hitbox() != null) {
+			return x + hitbox().width/2;
+		} else {
+			return x;
+		}
+	}
+	
+	public double getCenterY() {
+		if (hitbox() != null) {
+			return y + hitbox().height/2;
+		} else {
+			return y;
+		}
 	}
 	
 	/**
@@ -902,6 +988,13 @@ public abstract class GameObject extends GameAPI {
 		spriteX =  (spriteX + (val - x));
 		x = val;
 	}
+	
+	public void setCenterX (double val) {
+		xprevious = x;
+		spriteX =  (spriteX + ((val - hitbox().width/2) - x));
+		x = val - hitbox().width/2;
+	}
+	
 	public double getSpriteX() {
 		return spriteX;
 	}
@@ -1031,6 +1124,14 @@ public abstract class GameObject extends GameAPI {
 		spriteY =  (spriteY + (val - y));
 		y = val;
 	}
+	
+	public void setCenterY (double val) {
+		yprevious = y;
+		spriteY =  (spriteY + ((val - hitbox().height/2) - y));
+		y = val - hitbox().height/2;
+	}
+	
+	
 	/*
 	 * override to write code that is run on declaration of this object
 	 */
